@@ -1,3 +1,3 @@
-﻿# Unicorn Admin Helper
+# Unicorn Admin Helper
 
 Скрипт в помощь администраторам игрового SAMP-сервера Unicorn.

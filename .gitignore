@@ -42,6 +42,3 @@ luac.out
 # Скрипты
 /scripts/*.ps1
 !/scripts/*.example.ps1
-
-# Временная папка
-/tmp

@@ -6,7 +6,7 @@ $DistFolder = 'dist'
 $ScriptFilename = Split-Path $ScriptPath -leaf
 $CompiledScriptFilename = "$($ScriptFilename)c"
 
-$CompiledScriptPath = "..\$DistFolder\$CompiledScriptFilename"
+$CompiledScriptPath = ".\$DistFolder\$CompiledScriptFilename"
 $CompiledScriptGameFolderPath = "$GamePath\moonloader\$CompiledScriptFilename"
 
 <# Код #>
@@ -16,7 +16,7 @@ if (Test-Path -Path $CompiledScriptPath -PathType leaf)
 }
 
 cd .\luajit
-& '.\luajit.exe' '-b' ".$ScriptPath" $CompiledScriptPath
+& '.\luajit.exe' '-b' ".$ScriptPath" ".$CompiledScriptPath"
 cd ..
 
 Try
@@ -29,4 +29,4 @@ Catch
 }
 
 Remove-Item -Force $CompiledScriptGameFolderPath
-Copy-Item -Force $CompiledScriptPath -Destination $CompiledScriptGameFolderPath
+Copy-Item -Force -Path $CompiledScriptPath -Destination $CompiledScriptGameFolderPath

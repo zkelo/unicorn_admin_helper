@@ -1,1 +1,0 @@
-@luajit\luajit.exe

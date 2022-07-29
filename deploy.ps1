@@ -1,7 +1,6 @@
 . .\scripts\vars.ps1
 
 <# Перменные #>
-# Путь к временной папке
 $DistFolder = 'dist'
 
 $ScriptFilename = Split-Path $ScriptPath -leaf

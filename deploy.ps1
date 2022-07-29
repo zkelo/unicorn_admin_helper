@@ -4,20 +4,30 @@
 # Путь к временной папке
 $DistFolder = 'dist'
 
-# Название файла со скриптом из $ScriptPath
 $ScriptFilename = Split-Path $ScriptPath -leaf
+$CompiledScriptFilename = "$($ScriptFilename)c"
 
-# Полный путь к скомилированному скрипту во временной папке
-$CompiledScriptPath = "..\$DistFolder\$($ScriptFilename)c"
+$CompiledScriptPath = "..\$DistFolder\$CompiledScriptFilename"
+$CompiledScriptGameFolderPath = "$GamePath\moonloader\$CompiledScriptFilename"
 
+<# Код #>
 if (Test-Path -Path $CompiledScriptPath -PathType leaf)
 {
     Remove-Item -Force $CompiledScriptPath
 }
 
-<# Код #>
-New-Item -ItemType 'directory' -Name $DistFolder -Path './'
-
 cd .\luajit
 & '.\luajit.exe' '-b' ".$ScriptPath" $CompiledScriptPath
 cd ..
+
+Try
+{
+    '' | Out-File $CompiledScriptGameFolderPath
+}
+Catch
+{
+    Write-Error 'Нет прав на запись в папку игры'
+}
+
+Remove-Item -Force $CompiledScriptGameFolderPath
+Copy-Item -Force $CompiledScriptPath -Destination $CompiledScriptGameFolderPath

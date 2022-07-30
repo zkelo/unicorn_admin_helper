@@ -1,5 +1,6 @@
 --[[ Зависимости ]]
 local encoding = require 'encoding'
+local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 
 --[[ Переменные и значения по умолчанию ]]

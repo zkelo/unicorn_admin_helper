@@ -45,7 +45,7 @@ script_description(_('Скрипт в помощь администратору 
 script_version(_('2.0.5'))
 script_version_number(5)
 script_moonloader(26)
-script_dependencies('samp')
+script_dependencies('encoding', 'samp')
 
 --[[ Главные функции ]]
 function main()

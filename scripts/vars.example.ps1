@@ -5,7 +5,7 @@
 # в `vars.ps1`
 
 # Путь к главному файлу lua-скрипта
-$ScriptPath = '.\src\uah.lua'
+$ScriptPath = '.\src\UnicornAdminHelper.lua'
 
 # Путь к папке с игрой
 $GamePath = 'R:\GTA San Andreas'

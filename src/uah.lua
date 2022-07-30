@@ -5,6 +5,7 @@ local samp = require 'samp.events'
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
+local debug = false
 local players = {}
 
 --[[ Вспомогательные функции ]]
@@ -24,16 +25,21 @@ script_dependencies('samp')
 --[[ Главные функции ]]
 function main()
     -- Регистрация команд чата
-    -- [[ TODO ]]
+    -- [[ TODO ]] --
 
     -- Регистрация консольных команд
-    sampfuncsRegisterConsoleCommand('uah', function (args)
-        if #args == 0 then
-            print('uah [version|debug]')
-        else
-            print(args)
-        end
-    end)
+    if isSampfuncsLoaded() then
+        sampfuncsRegisterConsoleCommand('uah', function (arg)
+            if #arg == 0 then
+                print('uah [[num_]version | debug]')
+            elseif arg == 'version' then
+                print(thisScript().name .. ' ' .. thisScript().version)
+            elseif arg == 'debug' then
+                debug = not debug
+                print(debug and _('Отладка включена') or _('Отладка выключена'))
+            end
+        end)
+    end
 
     wait(-1)
 end

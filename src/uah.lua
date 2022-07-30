@@ -1,9 +1,9 @@
 --[[ Глобальные модули ]]
 local encoding = require 'encoding'
-local samp = require 'samp'
+local samp = require 'samp\\events'
 
 --[[ Модули скрипта ]]
-local command = require 'modules\\command'
+local command = require 'modules\\uah-command'
 
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'

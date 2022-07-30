@@ -26,7 +26,7 @@ script_dependencies('samp')
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
-local configFilename = 'UnicornAdminHelper'
+local configFilename = thisScript().name
 
 local players = {}
 local suspects = {}

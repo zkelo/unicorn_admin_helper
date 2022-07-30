@@ -39,10 +39,10 @@ function delSuspect(name)
 end
 
 --[[ Метаданные ]]
-script_name(_('Unicorn Admin Helper'))
-script_author(_('ZKelo'))
+script_name('Unicorn Admin Helper')
+script_author('ZKelo')
 script_description(_('Скрипт в помощь администратору игрового сервера Unicorn'))
-script_version(_('2.0.5'))
+script_version('2.0.5')
 script_version_number(5)
 script_moonloader(26)
 script_dependencies('encoding', 'samp')

@@ -6,7 +6,7 @@ local samp = require 'samp.events'
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
-local configFilename = thisScript().name
+local configFilename = 'UnicornAdminHelper'
 
 local players = {}
 local suspects = {}

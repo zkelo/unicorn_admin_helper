@@ -3,21 +3,6 @@ local encoding = require 'encoding'
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 
---[[ Переменные и значения по умолчанию ]]
-encoding.default = 'utf-8'
-
-local configFilename = 'UnicornAdminHelper'
-
-local players = {}
-local suspects = {}
-
-local data = inicfg.load({
-    settings = {
-        debug = false
-    },
-    suspects = {}
-}, configFilename)
-
 --[[ Вспомогательные функции ]]
 function _(text)
     return encoding.cp1251:encode(text)
@@ -37,6 +22,21 @@ script_version(_('2.0.5'))
 script_version_number(5)
 script_moonloader(26)
 script_dependencies('samp')
+
+--[[ Переменные и значения по умолчанию ]]
+encoding.default = 'utf-8'
+
+local configFilename = 'UnicornAdminHelper'
+
+local players = {}
+local suspects = {}
+
+local data = inicfg.load({
+    settings = {
+        debug = false
+    },
+    suspects = {}
+}, configFilename)
 
 --[[ Главные функции ]]
 function main()

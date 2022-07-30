@@ -2,6 +2,15 @@
 local encoding = require 'encoding'
 local samp = require 'samp.events'
 
+--[[ Метаданные ]]
+script_name(_('Unicorn Admin Helper'))
+script_author(_('ZKelo'))
+script_description(_('Скрипт в помощь администратору игрового сервера Unicorn'))
+script_version(_('2.0.5'))
+script_version_number(5)
+script_moonloader(26)
+script_dependencies('samp')
+
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 

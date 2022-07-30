@@ -34,6 +34,8 @@ function main()
                 print('uah [[num_]version | debug]')
             elseif arg == 'version' then
                 print(thisScript().name .. ' ' .. thisScript().version)
+            elseif arg == 'num_version' then
+                print(tostring(thisScript().version_num))
             elseif arg == 'debug' then
                 debug = not debug
                 print(debug and _('Отладка включена') or _('Отладка выключена'))

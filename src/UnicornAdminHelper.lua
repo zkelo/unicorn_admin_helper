@@ -11,7 +11,10 @@ local configFilename = 'UnicornAdminHelper'
 local color = {
     white = 0xFFFFFF,
     red = 0xF07474,
-    green = 0x86E153
+    green = 0x86E153,
+    yellow = 0xF3D176,
+
+    system = 0xAACCFF
 }
 
 local dialog = {
@@ -75,6 +78,10 @@ function main()
     while not isSampAvailable() do
         wait(100)
     end
+
+    -- Приветственное сообщение
+    sampAddChatMessage(_(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен'), color.system)
+    sampAddChatMessage(_('Для просмотра справки введите /uah'), color.yellow)
 
     -- Регистрация команд чата
     sampRegisterChatCommand('suspects', function ()

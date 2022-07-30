@@ -1,9 +1,6 @@
---[[ Глобальные модули ]]
+--[[ Зависимости ]]
 local encoding = require 'encoding'
-local samp = require 'samp\\events'
-
---[[ Модули скрипта ]]
-local command = require 'modules\\uah-command'
+local samp = require 'samp.events'
 
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
@@ -15,7 +12,8 @@ end
 
 --[[ Обработчики событий ]]
 function samp.onSendCommand(command)
-    return command:handle(command)
+    -- Здесь должен быть обработчик команд
+    -- с возможность добавления собственных
 end
 
 --[[ Вспомогательные функции ]]

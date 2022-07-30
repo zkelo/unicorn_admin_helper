@@ -23,7 +23,7 @@ function _(text)
 end
 
 function saveData()
-    if data.settings.debug and not inicfg.save(data, configFilename) then
+    if not inicfg.save(data, configFilename) and data.settings.debug then
         print('Не удалось сохранить данные в файл')
     end
 end

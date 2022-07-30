@@ -6,6 +6,8 @@ local samp = require 'samp.events'
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
+local configFilename = 'uah'
+
 local players = {}
 local suspects = {}
 
@@ -14,7 +16,7 @@ local data = inicfg.load({
         debug = false
     },
     suspects = {}
-})
+}, configFilename)
 
 --[[ Вспомогательные функции ]]
 function _(text)
@@ -22,7 +24,7 @@ function _(text)
 end
 
 function saveData()
-    if data.settings.debug and not inicfg.save(data) then
+    if data.settings.debug and not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
 end

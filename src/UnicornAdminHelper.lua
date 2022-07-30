@@ -90,8 +90,6 @@ function main()
             return false
         end
 
-        -- sampShowDialog(int id,zstring caption,zstring text,zstring button1,zstring button2,int style)
-
         local text = _('Статус\tНикнейм\tКомментарий')
 
         for nickname, comment in pairs(data.suspects) do

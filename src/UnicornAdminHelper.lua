@@ -74,7 +74,7 @@ end
 
 --[[ Обработчики событий ]]
 function samp.onPlayerJoin(playerId, color, isNpc, nickname)
-    players:insert(playerId + 1, nickname)
+    players[playerId + 1] = nickname
 end
 
 function samp.onPlayerQuit(playerId)

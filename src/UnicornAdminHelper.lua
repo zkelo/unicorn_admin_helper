@@ -40,25 +40,34 @@ script_dependencies('samp')
 
 --[[ Главные функции ]]
 function main()
+    -- Если SAMP или SAMPFUNCS не загружен,
+    -- то скрипт не будет работать
+    if not isSampLoaded() or not isSampfuncsLoaded() then
+        return
+    end
+
+    -- Ожидание до тех пор, пока SAMP не станет доступен
+    while not isSampAvailable() do
+        wait(100)
+    end
+
     -- Регистрация команд чата
-    -- [[ TODO ]] --
+    --[[ TODO ]]
 
     -- Регистрация консольных команд
-    if isSampfuncsLoaded() then
-        sampfuncsRegisterConsoleCommand('uah', function (arg)
-            if #arg == 0 then
-                print('uah [[num_]version | debug]')
-            elseif arg == 'version' then
-                print(thisScript().name .. ' ' .. thisScript().version)
-            elseif arg == 'num_version' then
-                print(tostring(thisScript().version_num))
-            elseif arg == 'debug' then
-                data.settings.debug = not data.settings.debug
-                print(data.settings.debug and _('Отладка включена') or _('Отладка выключена'))
-                saveData()
-            end
-        end)
-    end
+    sampfuncsRegisterConsoleCommand('uah', function (arg)
+        if #arg == 0 then
+            print('uah [[num_]version | debug]')
+        elseif arg == 'version' then
+            print(thisScript().name .. ' ' .. thisScript().version)
+        elseif arg == 'num_version' then
+            print(tostring(thisScript().version_num))
+        elseif arg == 'debug' then
+            data.settings.debug = not data.settings.debug
+            print(data.settings.debug and _('Отладка включена') or _('Отладка выключена'))
+            saveData()
+        end
+    end)
 
     wait(-1)
 end

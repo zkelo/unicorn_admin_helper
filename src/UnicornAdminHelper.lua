@@ -8,7 +8,6 @@ encoding.default = 'utf-8'
 
 local configFilename = 'UnicornAdminHelper'
 
-local players = {}
 local suspects = {}
 
 local data = inicfg.load({
@@ -73,14 +72,6 @@ function main()
 end
 
 --[[ Обработчики событий ]]
-function samp.onPlayerJoin(playerId, color, isNpc, nickname)
-    players[playerId + 1] = nickname
-end
-
-function samp.onPlayerQuit(playerId)
-    players:remove(playerId + 1)
-end
-
 function samp.onSendCommand(command)
     -- Здесь должен быть обработчик команд
     -- с возможность добавления собственных

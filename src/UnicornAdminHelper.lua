@@ -8,6 +8,18 @@ encoding.default = 'utf-8'
 
 local configFilename = 'UnicornAdminHelper'
 
+local color = {
+    white = 0xFFFFFF,
+    red = 0xF07474,
+    green = 0x86E153
+}
+
+local dialog = {
+    suspects = {
+        list = 1
+    }
+}
+
 local suspects = {}
 
 local data = inicfg.load({
@@ -16,6 +28,10 @@ local data = inicfg.load({
     },
     suspects = {}
 }, configFilename)
+
+if data.suspects == nil then
+    data.suspects = {}
+end
 
 --[[ Вспомогательные функции ]]
 function _(text)
@@ -55,13 +71,29 @@ function main()
         return
     end
 
-    -- Ожидание до тех пор, пока SAMP не станет доступен
+    -- Ожидание до тех пор, пока фукнции SAMP не станут доступны
     while not isSampAvailable() do
         wait(100)
     end
 
     -- Регистрация команд чата
-    --[[ TODO ]]
+    sampRegisterChatCommand('suspects', function ()
+        if #data.suspects == 0 then
+            sampAddChatMessage(_('Список нарушителей пуст.'), color.white)
+            return false
+        end
+
+        -- sampShowDialog(int id,zstring caption,zstring text,zstring button1,zstring button2,int style)
+
+        local text = _('Статус\tНикнейм\tКомментарий')
+
+        for nickname, comment in pairs(data.suspects) do
+
+            text = text .. '\n' .. _('Оффлайн\t' .. nickname .. '\t' .. comment)
+        end
+
+        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), text, 'Действия', 'Закрыть', 5)
+    end)
 
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
@@ -78,11 +110,15 @@ function main()
         end
     end)
 
-    wait(-1)
+    -- Главный цикл
+    while true do
+        wait(500)
+        --[[ TODO ]]
+    end
 end
 
 --[[ Обработчики событий ]]
 function samp.onSendCommand(command)
     -- Здесь должен быть обработчик команд
-    -- с возможность добавления собственных
+    -- с возможностью добавления собственных
 end

@@ -5,8 +5,6 @@ local samp = require 'samp.events'
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
-local suspects_filename
-
 local players = {}
 local suspects = {}
 

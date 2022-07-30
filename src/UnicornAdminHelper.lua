@@ -28,6 +28,16 @@ function saveData()
     end
 end
 
+function addSuspect(name, comment)
+    data.suspects[name] = comment
+    saveData()
+end
+
+function delSuspect(name)
+    data.suspects:remove(name)
+    saveData()
+end
+
 --[[ Метаданные ]]
 script_name(_('Unicorn Admin Helper'))
 script_author(_('ZKelo'))

@@ -28,7 +28,7 @@ if (-not (Test-Path -Path $CompiledScriptPath -PathType leaf))
 }
 else
 {
-    Write-Output 'Скрипт успешно скомпилирован'
+    Write-Host 'Скрипт успешно скомпилирован' -ForegroundColor Green
 }
 
 Write-Output 'Копирование скрипта в папку moonloader игры...'

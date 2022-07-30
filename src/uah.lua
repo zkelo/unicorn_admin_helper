@@ -5,12 +5,27 @@ local samp = require 'samp.events'
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
 
-local debug = false
+local suspects_filename
+
 local players = {}
+local suspects = {}
+
+local data = inicfg.load({
+    settings = {
+        debug = false
+    },
+    suspects = {}
+})
 
 --[[ Вспомогательные функции ]]
 function _(text)
     return encoding.cp1251:encode(text)
+end
+
+function saveData()
+    if data.settings.debug and not inicfg.save(data) then
+        print('Не удалось сохранить данные в файл')
+    end
 end
 
 --[[ Метаданные ]]
@@ -37,8 +52,9 @@ function main()
             elseif arg == 'num_version' then
                 print(tostring(thisScript().version_num))
             elseif arg == 'debug' then
-                debug = not debug
-                print(debug and _('Отладка включена') or _('Отладка выключена'))
+                data.settings.debug = not data.settings.debug
+                print(data.settings.debug and _('Отладка включена') or _('Отладка выключена'))
+                saveData()
             end
         end)
     end

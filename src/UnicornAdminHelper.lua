@@ -106,6 +106,10 @@ function main()
         for nickname, comment in pairs(data.suspects) do
             local status = c(color.red) .. 'Оффлайн'
 
+            if comment == '(не указан)' then
+                comment = c(color.lightGrey) .. comment
+            end
+
             list = list .. '\n' .. status .. '\t' .. nickname .. '\t' .. comment
         end
 
@@ -145,7 +149,7 @@ function main()
             return
         end
 
-        comment = c(color.lightGrey) .. '(не указан)'
+        comment = '(не указан)'
         addSuspect(nickname, comment)
         sampAddChatMessage(msg, color.grey)
     end)

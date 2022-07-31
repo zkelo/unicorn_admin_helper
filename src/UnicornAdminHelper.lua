@@ -145,11 +145,15 @@ function main()
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version]')
+            print('uah [[num_]version | suspects]')
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)
         elseif arg == 'num_version' then
             print(tostring(thisScript().version_num))
+        elseif arg == 'suspects' then
+            for name, comment in data.suspects do
+                print(_(string.format('%q: %q', name, comment)))debug
+            end
         end
     end)
 

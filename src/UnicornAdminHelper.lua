@@ -27,6 +27,7 @@ local dialog = {
 }
 
 local suspects = {}
+local players = {}
 
 local data = inicfg.load({
     settings = {
@@ -105,6 +106,13 @@ function main()
         local list = ''
         for nickname, comment in pairs(data.suspects) do
             local status = c(color.red) .. 'Оффлайн'
+
+            for playerNickname, playerId in pairs(players) do
+                if nickname == playerNickname then
+                    status = c(color.green) .. 'Онлайн'
+                    break
+                do
+            end
 
             if comment == '(не указан)' then
                 comment = c(color.lightGrey) .. comment
@@ -194,4 +202,12 @@ end
 function samp.onSendCommand(command)
     -- Здесь должен быть обработчик команд
     -- с возможностью добавления собственных
+end
+
+function samp.onPlayerJoin(playerId, color, isNpc, nickname)
+    players[playerId] = nickname
+end
+
+function samp.onPlayerQuit(playerId, reason)
+    players[playerId] = nil
 end

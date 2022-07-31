@@ -114,7 +114,7 @@ function main()
         for nickname, comment in pairs(data.suspects) do
             local status = c(color.red) .. 'Оффлайн'
 
-            for playerNickname, playerId in pairs(players) do
+            for playerId, playerNickname in pairs(players) do
                 if nickname == playerNickname then
                     status = c(color.green) .. 'Онлайн'
                     break

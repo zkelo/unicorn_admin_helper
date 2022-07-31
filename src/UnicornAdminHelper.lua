@@ -30,7 +30,7 @@ local suspects = {}
 
 local data = inicfg.load({
     settings = {
-        debug = false
+        autoPageSize = 0
     },
     suspects = {}
 }, configFilename)
@@ -145,15 +145,11 @@ function main()
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version | debug]')
+            print('uah [[num_]version]')
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)
         elseif arg == 'num_version' then
             print(tostring(thisScript().version_num))
-        elseif arg == 'debug' then
-            data.settings.debug = not data.settings.debug
-            print(data.settings.debug and _('Отладка включена') or _('Отладка выключена'))
-            saveData()
         end
     end)
 

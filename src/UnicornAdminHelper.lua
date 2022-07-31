@@ -124,7 +124,7 @@ function main()
             return
         end
 
-        nickname, comment = args:match('([^%s]+)%s*(.*)')
+        nickname, comment = args:match('([^%s ]+)%s*(.*)')
 
         if isEmpty(nickname) then
             sampAddChatMessage(hint, color.green)
@@ -151,7 +151,7 @@ function main()
     end)
 
     sampRegisterChatCommand('delsu', function (arg)
-        nickname = arg:match('([^%s]+)')
+        nickname = arg:match('([^%s ]+)')
 
         if isEmpty(nickname) then
             sampAddChatMessage(_('Подсказка: ' .. c(color.white) .. '/delsu ' .. c(color.lightGrey) .. '[никнейм] ' .. c(color.grey) .. '(удалить игрока из списка нарушителей)'), color.green)

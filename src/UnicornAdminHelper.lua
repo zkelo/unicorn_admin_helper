@@ -100,7 +100,7 @@ function main()
 
     -- Регистрация команд чата
     sampRegisterChatCommand('suspects', function ()
-        local text = _('Статус\tНикнейм\tКомментарий')
+        local text = 'Статус\tНикнейм\tКомментарий'
 
         local list = ''
         for nickname, comment in pairs(data.suspects) do
@@ -110,7 +110,7 @@ function main()
         end
 
         if isEmpty(list) then
-            list = 'Список пуст\t\t'
+            list = '\nСписок пуст\t\t'
         end
 
         sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Действия'), _('Закрыть'), 5)

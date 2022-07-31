@@ -157,7 +157,7 @@ function main()
         end
 
         delSuspect(nickname)
-        sampAddChatMessage(_())
+        sampAddChatMessage(_(string.format('Игрок %q удалён из списка нарушителей', nickname)), color.grey)
     end)
 
     -- Регистрация консольных команд

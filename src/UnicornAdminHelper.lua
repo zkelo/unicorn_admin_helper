@@ -49,7 +49,7 @@ function __(text)
 end
 
 function saveData()
-    if not inicfg.save(data, configFilename) and data.settings.debug then
+    if not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
 end

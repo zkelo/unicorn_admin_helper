@@ -60,7 +60,7 @@ function addSuspect(name, comment)
 end
 
 function delSuspect(name)
-    data.suspects:remove(name)
+    table.remove(data.suspects, name)
     saveData()
 end
 

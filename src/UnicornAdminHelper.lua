@@ -113,7 +113,7 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Действия'), _('Закрыть'), 5)
+        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Действия'), _('Закрыть'), DIALOG_STYLE_TABLIST_HEADERS)
     end)
 
     sampRegisterChatCommand('su', function (args)

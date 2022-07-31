@@ -130,6 +130,10 @@ function main()
         end
 
         nickname = __(nickname)
+        if not isEmpty(data.suspects[nickname]) then
+            delSuspect(nickname)
+        end
+
         if not isEmpty(comment) then
             comment = __(comment)
             addSuspect(nickname, comment)

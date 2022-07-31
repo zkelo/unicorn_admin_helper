@@ -133,13 +133,13 @@ function main()
         if not isEmpty(comment) then
             comment = __(comment)
             addSuspect(nickname, comment)
-            sampAddChatMessage(_('Список нарушителей обновлён'), system.grey)
+            sampAddChatMessage(_('Список нарушителей обновлён'), color.grey)
             return
         end
 
         comment = c(color.lightGrey) .. '(не указан)'
         addSuspect(nickname, comment)
-        sampAddChatMessage(_('Список нарушителей обновлён'), system.grey)
+        sampAddChatMessage(_('Список нарушителей обновлён'), color.grey)
     end)
 
     -- Регистрация консольных команд

@@ -136,16 +136,18 @@ function main()
             delSuspect(nickname)
         end
 
+        local msg = _(string.format('Игрок %q добавлен в список нарушителей', nickname))
+
         if not isEmpty(comment) then
             comment = __(comment)
             addSuspect(nickname, comment)
-            sampAddChatMessage(_('Список нарушителей обновлён'), color.grey)
+            sampAddChatMessage(msg, color.grey)
             return
         end
 
         comment = c(color.lightGrey) .. '(не указан)'
         addSuspect(nickname, comment)
-        sampAddChatMessage(_('Список нарушителей обновлён'), color.grey)
+        sampAddChatMessage(msg, color.grey)
     end)
 
     sampRegisterChatCommand('delsu', function (nickname)
@@ -155,6 +157,7 @@ function main()
         end
 
         delSuspect(nickname)
+        sampAddChatMessage(_())
     end)
 
     -- Регистрация консольных команд

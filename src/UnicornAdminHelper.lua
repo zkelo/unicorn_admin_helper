@@ -102,7 +102,7 @@ function main()
     sampRegisterChatCommand('suspects', function ()
         local text = _('Статус\tНикнейм\tКомментарий')
 
-        local list = nil
+        local list = ''
         for nickname, comment in pairs(data.suspects) do
             list = list .. '\n' .. 'Оффлайн\t' .. nickname .. '\t' .. comment
         end

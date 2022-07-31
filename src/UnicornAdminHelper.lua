@@ -152,7 +152,7 @@ function main()
             print(tostring(thisScript().version_num))
         elseif arg == 'suspects' then
             for name, comment in data.suspects do
-                print(_(string.format('%q: %q', name, comment)))debug
+                print(_(string.format('%q: %q', name, comment)))
             end
         end
     end)

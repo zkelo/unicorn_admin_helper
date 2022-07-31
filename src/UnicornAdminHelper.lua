@@ -124,7 +124,7 @@ function main()
             return
         end
 
-        nickname, comment = args:match('(.*)%s*(.*)')
+        nickname, comment = args:match('([^%s]+)%s*(.*)')
 
         if isEmpty(nickname) then
             sampAddChatMessage(hint, color.green)

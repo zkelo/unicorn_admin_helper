@@ -156,6 +156,8 @@ function main()
             return
         end
 
+        nickname = __(nickname)
+
         delSuspect(nickname)
         sampAddChatMessage(_(string.format('Игрок %q удалён из списка нарушителей', nickname)), color.grey)
     end)

@@ -100,18 +100,18 @@ function main()
 
     -- Регистрация команд чата
     sampRegisterChatCommand('suspects', function ()
-        if isEmpty(data.suspects) then
-            sampAddChatMessage(_('Список нарушителей пуст.'), color.white)
-            return false
-        end
-
         local text = _('Статус\tНикнейм\tКомментарий')
 
+        local list = nil
         for nickname, comment in pairs(data.suspects) do
-            text = text .. '\n' .. 'Оффлайн\t' .. nickname .. '\t' .. comment
+            list = list .. '\n' .. 'Оффлайн\t' .. nickname .. '\t' .. comment
         end
 
-        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text), _('Действия'), _('Закрыть'), 5)
+        if isEmpty(list) then
+            list = 'Список пуст\t\t'
+        end
+
+        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Действия'), _('Закрыть'), 5)
     end)
 
     sampRegisterChatCommand('su', function (args)

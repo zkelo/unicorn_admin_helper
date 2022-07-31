@@ -148,6 +148,15 @@ function main()
         sampAddChatMessage(_('Список нарушителей обновлён'), color.grey)
     end)
 
+    sampRegisterChatCommand('delsu', function (nickname)
+        if isEmpty(nickname) then
+            sampAddChatMessage(_('Подсказка: ' .. c(color.white) .. '/delsu ' .. c(color.lightGrey) .. '[никнейм] ' .. c(color.grey) .. '(удалить игрока из списка нарушителей)'), color.green)
+            return
+        end
+
+        delSuspect(nickname)
+    end)
+
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then

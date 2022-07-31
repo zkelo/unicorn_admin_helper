@@ -95,6 +95,13 @@ function main()
         wait(100)
     end
 
+    -- Заполнение таблицы со списком игроков
+    for playerId = 0, sampGetMaxPlayerId() do
+        if sampIsPlayerConnected(playerId) then
+            players[playerId] = __(sampGetPlayerNickname(playerId))
+        end
+    end
+
     -- Приветственное сообщение
     sampAddChatMessage(_(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен'), color.system)
     sampAddChatMessage(_('Для просмотра справки введите /uah'), color.yellow)
@@ -205,7 +212,7 @@ function samp.onSendCommand(command)
 end
 
 function samp.onPlayerJoin(playerId, color, isNpc, nickname)
-    players[playerId] = nickname
+    players[playerId] = __(nickname)
 end
 
 function samp.onPlayerQuit(playerId, reason)

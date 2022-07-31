@@ -100,7 +100,7 @@ function main()
 
     -- Регистрация команд чата
     sampRegisterChatCommand('suspects', function ()
-        if #data.suspects == 0 then
+        if isEmpty(data.suspects) then
             sampAddChatMessage(_('Список нарушителей пуст.'), color.white)
             return false
         end
@@ -122,7 +122,7 @@ function main()
             return
         end
 
-        nickname, comment = args:match('(%g+)%s*(.*)')
+        nickname, comment = args:match('(.*)%s*(.*)')
 
         if isEmpty(nickname) then
             sampAddChatMessage(hint, color.green)
@@ -133,18 +133,18 @@ function main()
         if not isEmpty(comment) then
             comment = __(comment)
             addSuspect(nickname, comment)
-            sampAddChatMessage(_(string.format('Игрок %q добавлен список нарушителей с комментарием %q', nickname, comment)), color.system)
+            sampAddChatMessage(_('Список нарушителей обновлён'), system.grey)
             return
         end
 
         comment = c(color.lightGrey) .. '(не указан)'
         addSuspect(nickname, comment)
-        sampAddChatMessage(_(string.format('Игрок %q добавлен в список нарушителей', nickname)), color.system)
+        sampAddChatMessage(_('Список нарушителей обновлён'), system.grey)
     end)
 
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
-        if #arg == 0 then
+        if isEmpty(arg) then
             print('uah [[num_]version | debug]')
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)

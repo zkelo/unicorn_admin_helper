@@ -28,6 +28,7 @@ local dialog = {
 
 local suspects = {}
 local players = {}
+local isPlayerSpectating = false
 
 local data = inicfg.load({
     settings = {
@@ -200,8 +201,19 @@ function main()
 
     -- Главный цикл
     while true do
-        wait(500)
-        --[[ TODO ]]
+        wait(0)
+
+        --[[ Обработка диалогов ]]
+        -- Диалог со списком нарушителей
+        local result, button, list, input = sampHasDialogRespond(dialog.suspects.list)
+        if result and button == 1 then
+            sampAddChatMessage(_(string.format('result: %q, button: %q, list: %q, input: %q', result, button, list, input)), color.white)
+            --[[ if isPlayerSpectating then
+                --
+            else
+                --
+            end ]]
+        end
     end
 end
 
@@ -217,4 +229,8 @@ end
 
 function samp.onPlayerQuit(playerId, reason)
     players[playerId] = nil
+end
+
+function samp.onTogglePlayerSpectating(state)
+    isPlayerSpectating = state
 end

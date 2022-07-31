@@ -111,7 +111,7 @@ function main()
                 if nickname == playerNickname then
                     status = c(color.green) .. 'Онлайн'
                     break
-                do
+                end
             end
 
             if comment == '(не указан)' then

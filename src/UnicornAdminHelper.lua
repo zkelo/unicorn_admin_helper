@@ -14,6 +14,8 @@ local color = {
     red = 0xF07474,
     green = 0x86E153,
     yellow = 0xF3D176,
+    grey = 0xC6C6C6,
+    lightGrey = 0xE5E5E5,
 
     system = 0xAACCFF
 }
@@ -62,6 +64,14 @@ function delSuspect(name)
     saveData()
 end
 
+function c(color)
+    return '{' .. string.format('%x', color) .. '}'
+end
+
+function isEmpty(var)
+    return var == nil or #var == 0
+end
+
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
 script_author('ZKelo')
@@ -105,7 +115,31 @@ function main()
     end)
 
     sampRegisterChatCommand('su', function (args)
-        nickname, comment = args:match('(%g+)%s+(.+)')
+        local hint = _('Подсказка: ' .. c(color.white) ..'/su ' .. c(color.lightGrey) .. '[никнейм] [Комментарий (необязательно)] ' .. c(color.grey) .. '(добавить игрока в список нарушителей)')
+
+        if isEmpty(args) then
+            sampAddChatMessage(hint, color.green)
+            return
+        end
+
+        nickname, comment = args:match('(%g+)%s*(.*)')
+
+        if isEmpty(nickname) then
+            sampAddChatMessage(hint, color.green)
+            return
+        end
+
+        nickname = __(nickname)
+        if not isEmpty(comment) then
+            comment = __(comment)
+            addSuspect(nickname, comment)
+            sampAddChatMessage(_(string.format('Игрок %q добавлен список нарушителей с комментарием %q', nickname, comment)), color.system)
+            return
+        end
+
+        comment = c(color.lightGrey) .. '(не указан)'
+        addSuspect(nickname, comment)
+        sampAddChatMessage(_(string.format('Игрок %q добавлен в список нарушителей', nickname)), color.system)
     end)
 
     -- Регистрация консольных команд

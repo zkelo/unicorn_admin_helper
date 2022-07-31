@@ -104,7 +104,9 @@ function main()
 
         local list = ''
         for nickname, comment in pairs(data.suspects) do
-            list = list .. '\n' .. 'Оффлайн\t' .. nickname .. '\t' .. comment
+            local status = c(color.red) .. 'Оффлайн'
+
+            list = list .. '\n' .. status .. '\t' .. nickname .. '\t' .. comment
         end
 
         if isEmpty(list) then

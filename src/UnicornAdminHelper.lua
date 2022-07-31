@@ -60,7 +60,7 @@ function addSuspect(name, comment)
 end
 
 function delSuspect(name)
-    table.remove(data.suspects, name)
+    data.suspects[name] = nil
     saveData()
 end
 

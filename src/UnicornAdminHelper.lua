@@ -5,6 +5,7 @@ local samp = require 'samp.events'
 
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
+local cp1251 = encoding.cp1251
 
 local configFilename = 'UnicornAdminHelper'
 
@@ -38,7 +39,11 @@ end
 
 --[[ Вспомогательные функции ]]
 function _(text)
-    return encoding.cp1251:encode(text)
+    return cp1251:encode(text)
+end
+
+function __(text)
+    return cp1251:decode(text)
 end
 
 function saveData()
@@ -93,11 +98,14 @@ function main()
         local text = _('Статус\tНикнейм\tКомментарий')
 
         for nickname, comment in pairs(data.suspects) do
-
-            text = text .. '\n' .. _('Оффлайн\t' .. nickname .. '\t' .. comment)
+            text = text .. '\n' .. 'Оффлайн\t' .. nickname .. '\t' .. comment
         end
 
-        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), text, 'Действия', 'Закрыть', 5)
+        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text), _('Действия'), _('Закрыть'), 5)
+    end)
+
+    sampRegisterChatCommand('su', function (args)
+        nickname, comment = args:match('(%g+)%s+(.+)')
     end)
 
     -- Регистрация консольных команд

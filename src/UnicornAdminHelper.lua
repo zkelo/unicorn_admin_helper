@@ -127,7 +127,7 @@ function main()
                 comment = c(color.lightGrey) .. comment
             end
 
-            list = list .. '\n' .. isPlayerWithNicknameOnline(nickname) and c(color.green) .. 'Онлайн' or c(color.red) .. 'Оффлайн' .. '\t' .. nickname .. '\t' .. comment
+            list = list .. '\n' .. (isPlayerWithNicknameOnline(nickname) and c(color.green) .. 'Онлайн' or c(color.red)) .. 'Оффлайн' .. '\t' .. nickname .. '\t' .. comment
         end
 
         if isEmpty(list) then

@@ -74,6 +74,16 @@ function isEmpty(var)
     return var == nil or #var == 0
 end
 
+function isPlayerWithNicknameOnline(nickname)
+    for id, name in pairs(nickname) do
+        if name == nickname then
+            return true
+        end
+    end
+
+    return false
+end
+
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
 script_author('ZKelo')
@@ -113,20 +123,11 @@ function main()
 
         local list = ''
         for nickname, comment in pairs(data.suspects) do
-            local status = c(color.red) .. 'Оффлайн'
-
-            for playerId, playerNickname in pairs(players) do
-                if nickname == playerNickname then
-                    status = c(color.green) .. 'Онлайн'
-                    break
-                end
-            end
-
             if comment == '(не указан)' then
                 comment = c(color.lightGrey) .. comment
             end
 
-            list = list .. '\n' .. status .. '\t' .. nickname .. '\t' .. comment
+            list = list .. '\n' .. isPlayerWithNicknameOnline(nickname) and (color.green) .. 'Онлайн' or c(color.red) .. 'Оффлайн' .. '\t' .. nickname .. '\t' .. comment
         end
 
         if isEmpty(list) then

@@ -75,7 +75,7 @@ function isEmpty(var)
 end
 
 function isPlayerWithNicknameOnline(nickname)
-    for id, name in pairs(nickname) do
+    for id, name in pairs(players) do
         if name == nickname then
             return true
         end

@@ -2,6 +2,7 @@
 local encoding = require 'encoding'
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
+local key = require 'vkeys'
 
 --[[ Переменные и значения по умолчанию ]]
 encoding.default = 'utf-8'
@@ -214,6 +215,12 @@ function main()
             else
                 --
             end ]]
+        end
+
+        --[[ Обработка нажатий клавиш ]]
+        -- Открытие списка нарушителей (F2)
+        if isKeyJustPressed(key.VK_F2) then
+            sampProcessChatInput('/suspects')
         end
     end
 end

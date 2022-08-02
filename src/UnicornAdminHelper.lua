@@ -225,7 +225,7 @@ function main()
             if nickname ~= nil then
                 if isKeyJustPressed(vkeys.VK_DELETE) then
                     -- Удаление из списка
-                    sampProcessChatInput(string.format('/delsu %s', nickname))
+                    delSuspect(nickname)
                     sampProcessChatInput('/suspects')
                 elseif isKeyJustPressed(vkeys.VK_SPACE) then
                     -- Изменение комментария

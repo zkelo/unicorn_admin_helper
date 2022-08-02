@@ -166,7 +166,7 @@ function main()
 
         local msg = string.format('Игрок %q добавлен в список нарушителей', nickname)
 
-        if not isEmpty(comment) then
+        if isEmpty(comment) then
             comment = '(не указан)'
         end
 

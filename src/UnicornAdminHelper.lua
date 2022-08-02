@@ -1,7 +1,7 @@
 --[[ Зависимости ]]
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
-local k = require 'vkeys'
+local vkeys = require 'vkeys'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -216,15 +216,27 @@ function main()
 
         --[[ Обработка нажатий клавиш ]]
         -- Открытие списка нарушителей (F2)
-        if isKeyJustPressed(k.VK_F2) then
+        if isKeyJustPressed(vkeys.VK_F2) then
             sampProcessChatInput('/suspects')
-        elseif isKeyJustPressed(k.VK_DELETE) and sampIsDialogActive() and sampGetCurrentDialogId(dialog.suspects.list) then
+        end
+
+        -- Действия при открытом диалоге со списком нарушителей
+        if sampIsDialogActive() and sampIsDialogClientside() and sampGetCurrentDialogId(dialog.suspects.list) then
             local listitem = sampGetCurrentDialogListItem()
             local nickname = getSuspectNicknameByIndex(listitem)
 
             if nickname ~= nil then
-                sampProcessChatInput(string.format('/delsu %s', nickname))
-                sampProcessChatInput('/suspects')
+                if isKeyJustPressed(vkeys.VK_DELETE) then
+                    -- Удаление из списка
+                    sampProcessChatInput(string.format('/delsu %s', nickname))
+                    sampProcessChatInput('/suspects')
+                elseif isKeyJustPressed(vkeys.VK_SPACE) then
+                    -- Изменение комментария
+                    sampCloseCurrentDialogWithButton(0)
+                    sampProcessChatInput('/su')
+                    sampSetChatInputEnabled(true)
+                    sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                end
             end
         end
     end

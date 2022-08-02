@@ -24,7 +24,6 @@ local dialog = {
 }
 
 local suspects = {}
-local players = {}
 local isPlayerSpectating = false
 
 local data = inicfg.load({
@@ -64,7 +63,7 @@ function isEmpty(var)
 end
 
 function isPlayerWithNicknameOnline(nickname)
-    return not getPlayerIdByNickname(nickname) == nil
+    return not (getPlayerIdByNickname(nickname) == nil)
 end
 
 function getPlayerIdByNickname(nickname)
@@ -113,13 +112,6 @@ function main()
         wait(100)
     end
 
-    -- Заполнение таблицы со списком игроков
-    for playerId = 0, sampGetMaxPlayerId() do
-        if sampIsPlayerConnected(playerId) then
-            players[playerId] = sampGetPlayerNickname(playerId)
-        end
-    end
-
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
     sampAddChatMessage('Для просмотра справки введите /uah', color.yellow)
@@ -141,7 +133,7 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        sampShowDialog(dialog.suspects.list, 'Список нарушителей', text .. list, 'Выбрать', 'Закрыть', DIALOG_STYLE_TABLIST_HEADERS)
+        sampShowDialog(dialog.suspects.list, 'Список нарушителей', text .. list, 'Следить', 'Закрыть', DIALOG_STYLE_TABLIST_HEADERS)
     end)
 
     sampRegisterChatCommand('su', function (args)
@@ -214,7 +206,11 @@ function main()
             local nickname = getSuspectNicknameByIndex(list)
             local playerId = getPlayerIdByNickname(nickname)
 
-            -- sampSendChat()
+            if isPlayerWithNicknameOnline(nickname) then
+                sampSendChat(string.format('/re %i', playerId))
+            else
+                sampAddChatMessage(string.format('Игрок %q сейчас оффлайн', nickname), color.red)
+            end
         end
 
         --[[ Обработка нажатий клавиш ]]
@@ -230,15 +226,6 @@ function samp.onSendCommand(command)
     -- Здесь должен быть обработчик команд
     -- с возможностью добавления собственных
 end
-
-function samp.onPlayerJoin(playerId, color, isNpc, nickname)
-    players[playerId] = nickname
-end
-
-function samp.onPlayerQuit(playerId, reason)
-    players[playerId] = nil
-end
-
 function samp.onTogglePlayerSpectating(state)
     isPlayerSpectating = state
 end

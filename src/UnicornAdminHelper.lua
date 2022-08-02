@@ -72,7 +72,7 @@ function isEmpty(var)
 end
 
 function isPlayerWithNicknameOnline(nickname)
-    return not (getPlayerIdByNickname(nickname) == nil)
+    return getPlayerIdByNickname(nickname) ~= nil
 end
 
 function getPlayerIdByNickname(nickname)
@@ -205,21 +205,9 @@ function main()
         if result and button == 1 then
             local nickname = getSuspectNicknameByIndex(listitem)
 
-            --[[ sampAddChatMessage(
-                string.format(
-                    'nick: %q - is nil? %q - is online? %q - playerid: %d | cmdstr: %q',
-                    nickname,
-                    nickname == nil,
-                    isPlayerWithNicknameOnline(nickname),
-                    getPlayerIdByNickname(nickname),
-                    string.format('/re %i', getPlayerIdByNickname(nickname))
-                ),
-                color.white
-            ) ]]
-
-            if not nickname == nil then
+            if nickname ~= nil then
                 if isPlayerWithNicknameOnline(nickname) then
-                    sampSendChat(string.format('/spec %d', getPlayerIdByNickname(nickname)))
+                    sampSendChat(string.format('/re %d', getPlayerIdByNickname(nickname)))
                 else
                     sampAddChatMessage(string.format('Игрок %q сейчас оффлайн', nickname), color.red)
                 end
@@ -234,7 +222,7 @@ function main()
             local listitem = sampGetCurrentDialogListItem()
             local nickname = getSuspectNicknameByIndex(listitem)
 
-            if not nickname == nil then
+            if nickname ~= nil then
                 sampProcessChatInput(string.format('/delsu %s', nickname))
                 sampProcessChatInput('/suspects')
             end

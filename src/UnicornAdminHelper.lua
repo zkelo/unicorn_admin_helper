@@ -226,7 +226,7 @@ function main()
         --[[ Обработка диалогов ]]
         -- Диалог со списком нарушителей
         local result, button, list = sampHasDialogRespond(dialog.suspects.list)
-        if result and button then
+        if result and button == 1 then
             sampAddChatMessage(_(string.format('Выбран игрок с ником %q', getSuspectNicknameByIndex(list))), color.white)
         end
 

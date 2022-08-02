@@ -224,8 +224,10 @@ function main()
             local listitem = sampGetCurrentDialogListItem()
             local nickname = getSuspectNicknameByIndex(listitem)
 
-            sampProcessChatInput(string.format('/delsu %s', nickname))
-            sampProcessChatInput('/suspects')
+            if not nickname == nil then
+                sampProcessChatInput(string.format('/delsu %s', nickname))
+                sampProcessChatInput('/suspects')
+            end
         end
     end
 end

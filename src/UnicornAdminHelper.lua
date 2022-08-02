@@ -205,11 +205,21 @@ function main()
         if result and button == 1 then
             local nickname = getSuspectNicknameByIndex(listitem)
 
-            if not nickname == nil then
-                local playerId = getPlayerIdByNickname(nickname)
+            --[[ sampAddChatMessage(
+                string.format(
+                    'nick: %q - is nil? %q - is online? %q - playerid: %d | cmdstr: %q',
+                    nickname,
+                    nickname == nil,
+                    isPlayerWithNicknameOnline(nickname),
+                    getPlayerIdByNickname(nickname),
+                    string.format('/re %i', getPlayerIdByNickname(nickname))
+                ),
+                color.white
+            ) ]]
 
+            if not nickname == nil then
                 if isPlayerWithNicknameOnline(nickname) then
-                    sampSendChat(string.format('/re %i', playerId))
+                    sampSendChat(string.format('/spec %d', getPlayerIdByNickname(nickname)))
                 else
                     sampAddChatMessage(string.format('Игрок %q сейчас оффлайн', nickname), color.red)
                 end

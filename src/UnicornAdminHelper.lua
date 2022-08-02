@@ -1,7 +1,16 @@
 --[[ Зависимости ]]
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
-local key = require 'vkeys'
+local k = require 'vkeys'
+
+--[[ Метаданные ]]
+script_name('Unicorn Admin Helper')
+script_author('ZKelo')
+script_description('Скрипт в помощь администратору игрового сервера Unicorn')
+script_version('2.0.5')
+script_version_number(5)
+script_moonloader(26)
+script_dependencies('encoding', 'samp')
 
 --[[ Переменные и значения по умолчанию ]]
 local configFilename = 'UnicornAdminHelper'
@@ -89,15 +98,6 @@ function getSuspectNicknameByIndex(index)
 
     return nil
 end
-
---[[ Метаданные ]]
-script_name('Unicorn Admin Helper')
-script_author('ZKelo')
-script_description('Скрипт в помощь администратору игрового сервера Unicorn')
-script_version('2.0.5')
-script_version_number(5)
-script_moonloader(26)
-script_dependencies('encoding', 'samp')
 
 --[[ Главные функции ]]
 function main()
@@ -201,9 +201,9 @@ function main()
 
         --[[ Обработка диалогов ]]
         -- Диалог со списком нарушителей
-        local result, button, list = sampHasDialogRespond(dialog.suspects.list)
+        local result, button, listitem = sampHasDialogRespond(dialog.suspects.list)
         if result and button == 1 then
-            local nickname = getSuspectNicknameByIndex(list)
+            local nickname = getSuspectNicknameByIndex(listitem)
             local playerId = getPlayerIdByNickname(nickname)
 
             if isPlayerWithNicknameOnline(nickname) then
@@ -215,7 +215,13 @@ function main()
 
         --[[ Обработка нажатий клавиш ]]
         -- Открытие списка нарушителей (F2)
-        if isKeyJustPressed(key.VK_F2) then
+        if isKeyJustPressed(k.VK_F2) then
+            sampProcessChatInput('/suspects')
+        elseif isKeyJustPressed(k.VK_DELETE) and sampIsDialogActive() and sampGetCurrentDialogId(dialog.suspects.list) then
+            local listitem = sampGetCurrentDialogListItem()
+            local nickname = getSuspectNicknameByIndex(listitem)
+
+            sampProcessChatInput(string.format('/delsu %s', nickname))
             sampProcessChatInput('/suspects')
         end
     end

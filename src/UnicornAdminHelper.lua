@@ -1,13 +1,9 @@
 --[[ Зависимости ]]
-local encoding = require 'encoding'
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 local key = require 'vkeys'
 
 --[[ Переменные и значения по умолчанию ]]
-encoding.default = 'utf-8'
-local cp1251 = encoding.cp1251
-
 local configFilename = 'UnicornAdminHelper'
 
 local color = {
@@ -43,14 +39,6 @@ if data.suspects == nil then
 end
 
 --[[ Вспомогательные функции ]]
-function _(text)
-    return cp1251:encode(text)
-end
-
-function __(text)
-    return cp1251:decode(text)
-end
-
 function saveData()
     if not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')
@@ -106,7 +94,7 @@ end
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
 script_author('ZKelo')
-script_description(_('Скрипт в помощь администратору игрового сервера Unicorn'))
+script_description('Скрипт в помощь администратору игрового сервера Unicorn')
 script_version('2.0.5')
 script_version_number(5)
 script_moonloader(26)
@@ -128,13 +116,13 @@ function main()
     -- Заполнение таблицы со списком игроков
     for playerId = 0, sampGetMaxPlayerId() do
         if sampIsPlayerConnected(playerId) then
-            players[playerId] = __(sampGetPlayerNickname(playerId))
+            players[playerId] = sampGetPlayerNickname(playerId)
         end
     end
 
     -- Приветственное сообщение
-    sampAddChatMessage(_(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен'), color.system)
-    sampAddChatMessage(_('Для просмотра справки введите /uah'), color.yellow)
+    sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
+    sampAddChatMessage('Для просмотра справки введите /uah', color.yellow)
 
     -- Регистрация команд чата
     sampRegisterChatCommand('suspects', function ()
@@ -153,11 +141,11 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Выбрать'), _('Закрыть'), DIALOG_STYLE_TABLIST_HEADERS)
+        sampShowDialog(dialog.suspects.list, 'Список нарушителей', text .. list, 'Выбрать', 'Закрыть', DIALOG_STYLE_TABLIST_HEADERS)
     end)
 
     sampRegisterChatCommand('su', function (args)
-        local hint = _('Подсказка: ' .. c(color.white) ..'/su ' .. c(color.lightGrey) .. '[никнейм] [Комментарий (необязательно)] ' .. c(color.grey) .. '(добавить игрока в список нарушителей)')
+        local hint = 'Подсказка: ' .. c(color.white) ..'/su ' .. c(color.lightGrey) .. '[никнейм] [Комментарий (необязательно)] ' .. c(color.grey) .. '(добавить игрока в список нарушителей)'
 
         if isEmpty(args) then
             sampAddChatMessage(hint, color.green)
@@ -171,15 +159,13 @@ function main()
             return
         end
 
-        nickname = __(nickname)
         if not isEmpty(data.suspects[nickname]) then
             delSuspect(nickname)
         end
 
-        local msg = _(string.format('Игрок %q добавлен в список нарушителей', nickname))
+        local msg = string.format('Игрок %q добавлен в список нарушителей', nickname)
 
         if not isEmpty(comment) then
-            comment = __(comment)
             addSuspect(nickname, comment)
             sampAddChatMessage(msg, color.grey)
             return
@@ -194,14 +180,12 @@ function main()
         nickname = arg:match('([^%s ]+)')
 
         if isEmpty(nickname) then
-            sampAddChatMessage(_('Подсказка: ' .. c(color.white) .. '/delsu ' .. c(color.lightGrey) .. '[никнейм] ' .. c(color.grey) .. '(удалить игрока из списка нарушителей)'), color.green)
+            sampAddChatMessage('Подсказка: ' .. c(color.white) .. '/delsu ' .. c(color.lightGrey) .. '[никнейм] ' .. c(color.grey) .. '(удалить игрока из списка нарушителей)', color.green)
             return
         end
 
-        nickname = __(nickname)
-
         delSuspect(nickname)
-        sampAddChatMessage(_(string.format('Игрок %q удалён из списка нарушителей', nickname)), color.grey)
+        sampAddChatMessage(string.format('Игрок %q удалён из списка нарушителей', nickname), color.grey)
     end)
 
     -- Регистрация консольных команд
@@ -214,7 +198,7 @@ function main()
             print(tostring(thisScript().version_num))
         elseif arg == 'suspects' then
             for name, comment in pairs(data.suspects) do
-                print(_(string.format('%q: %q', name, comment)))
+                print(string.format('%q: %q', name, comment))
             end
         end
     end)
@@ -227,7 +211,10 @@ function main()
         -- Диалог со списком нарушителей
         local result, button, list = sampHasDialogRespond(dialog.suspects.list)
         if result and button == 1 then
-            sampAddChatMessage(_(string.format('Выбран игрок с ником %q', getSuspectNicknameByIndex(list))), color.white)
+            local nickname = getSuspectNicknameByIndex(list)
+            local playerId = getPlayerIdByNickname(nickname)
+
+            -- sampSendChat()
         end
 
         --[[ Обработка нажатий клавиш ]]
@@ -245,7 +232,7 @@ function samp.onSendCommand(command)
 end
 
 function samp.onPlayerJoin(playerId, color, isNpc, nickname)
-    players[playerId] = __(nickname)
+    players[playerId] = nickname
 end
 
 function samp.onPlayerQuit(playerId, reason)

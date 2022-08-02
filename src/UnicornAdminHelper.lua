@@ -23,7 +23,7 @@ local color = {
 
 local dialog = {
     suspects = {
-        list = 1
+        list = 100
     }
 }
 
@@ -76,13 +76,31 @@ function isEmpty(var)
 end
 
 function isPlayerWithNicknameOnline(nickname)
-    for id, name in pairs(players) do
-        if name == nickname then
-            return true
+    return not getPlayerIdByNickname(nickname) == nil
+end
+
+function getPlayerIdByNickname(nickname)
+    for id = 0, sampGetMaxPlayerId(false) do
+        if sampIsPlayerConnected(id) and sampGetPlayerNickname(id) == nickname then
+            return id
         end
     end
 
-    return false
+    return nil
+end
+
+function getSuspectNicknameByIndex(index)
+    local i = 0
+
+    for nickname, _ in pairs(data.suspects) do
+        if i == index then
+            return nickname
+        end
+
+        i = i + 1
+    end
+
+    return nil
 end
 
 --[[ Метаданные ]]
@@ -135,7 +153,7 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Действия'), _('Закрыть'), DIALOG_STYLE_TABLIST_HEADERS)
+        sampShowDialog(dialog.suspects.list, _('Список нарушителей'), _(text .. list), _('Выбрать'), _('Закрыть'), DIALOG_STYLE_TABLIST_HEADERS)
     end)
 
     sampRegisterChatCommand('su', function (args)
@@ -207,14 +225,9 @@ function main()
 
         --[[ Обработка диалогов ]]
         -- Диалог со списком нарушителей
-        local result, button, list, input = sampHasDialogRespond(dialog.suspects.list)
-        if result and button == 1 then
-            sampAddChatMessage(_(string.format('result: %q, button: %q, list: %q, input: %q', result, button, list, input)), color.white)
-            --[[ if isPlayerSpectating then
-                --
-            else
-                --
-            end ]]
+        local result, button, list = sampHasDialogRespond(dialog.suspects.list)
+        if result and button then
+            sampAddChatMessage(_(string.format('Выбран игрок с ником %q', getSuspectNicknameByIndex(list))), color.white)
         end
 
         --[[ Обработка нажатий клавиш ]]

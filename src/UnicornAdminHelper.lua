@@ -204,12 +204,15 @@ function main()
         local result, button, listitem = sampHasDialogRespond(dialog.suspects.list)
         if result and button == 1 then
             local nickname = getSuspectNicknameByIndex(listitem)
-            local playerId = getPlayerIdByNickname(nickname)
 
-            if isPlayerWithNicknameOnline(nickname) then
-                sampSendChat(string.format('/re %i', playerId))
-            else
-                sampAddChatMessage(string.format('Игрок %q сейчас оффлайн', nickname), color.red)
+            if not nickname == nil then
+                local playerId = getPlayerIdByNickname(nickname)
+
+                if isPlayerWithNicknameOnline(nickname) then
+                    sampSendChat(string.format('/re %i', playerId))
+                else
+                    sampAddChatMessage(string.format('Игрок %q сейчас оффлайн', nickname), color.red)
+                end
             end
         end
 

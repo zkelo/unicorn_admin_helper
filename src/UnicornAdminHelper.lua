@@ -151,19 +151,25 @@ function main()
             return
         end
 
-        if not isEmpty(data.suspects[nickname]) then
+        local lowerNickname = nickname:lower()
+
+        local _, localPlayerId = sampGetPlayerIdByCharHandle(PLAYER_PED)
+        local localPlayerName = sampGetPlayerNickname(localPlayerId)
+        if lowerNickname == localPlayerName:lower() then
+            sampAddChatMessage('Вы не можете добавить себя в список нарушителей', color.red)
+            return
+        end
+
+        if not isEmpty(data.suspects[lowerNickname]) then
             delSuspect(nickname)
         end
 
         local msg = string.format('Игрок %q добавлен в список нарушителей', nickname)
 
         if not isEmpty(comment) then
-            addSuspect(nickname, comment)
-            sampAddChatMessage(msg, color.grey)
-            return
+            comment = '(не указан)'
         end
 
-        comment = '(не указан)'
         addSuspect(nickname, comment)
         sampAddChatMessage(msg, color.grey)
     end)

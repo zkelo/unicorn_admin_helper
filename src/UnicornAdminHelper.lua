@@ -29,6 +29,9 @@ local color = {
 local dialog = {
     suspects = {
         list = 100
+    },
+    command = {
+        create = 101
     }
 }
 

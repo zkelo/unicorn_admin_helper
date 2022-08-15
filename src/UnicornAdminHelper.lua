@@ -16,22 +16,21 @@ script_dependencies('encoding', 'samp')
 local configFilename = 'UnicornAdminHelper'
 
 local color = {
-    white = 0xFFFFFF,
-    red = 0xF07474,
-    green = 0x86E153,
-    yellow = 0xF3D176,
-    grey = 0xC6C6C6,
-    lightGrey = 0xE5E5E5,
+    white = 0xffffff,
+    red = 0xf07474,
+    green = 0x86e153,
+    yellow = 0xf3d176,
+    grey = 0xc6c6c6,
+    lightGrey = 0xe5e5e5,
+    darkGrey = 0x444444,
 
-    system = 0xAACCFF
+    system = 0xaaccff
 }
 
 local dialog = {
+    main = 100,
     suspects = {
-        list = 100
-    },
-    command = {
-        create = 101
+        list = 101
     }
 }
 
@@ -42,7 +41,8 @@ local data = inicfg.load({
     settings = {
         autoPageSize = 0
     },
-    suspects = {}
+    suspects = {},
+    commands = {}
 }, configFilename)
 
 if data.suspects == nil then
@@ -68,6 +68,10 @@ end
 
 function c(color)
     return '{' .. string.format('%x', color) .. '}'
+end
+
+function f(s, ...)
+    return string.format(s, ...)
 end
 
 function isEmpty(var)
@@ -120,6 +124,18 @@ function main()
     sampAddChatMessage('Для просмотра справки введите /uah', color.yellow)
 
     -- Регистрация команд чата
+    sampRegisterChatCommand('uah', function ()
+        local content = f(
+            '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат\n \n',
+            c(color.yellow), c(color.green), c(color.grey), c(color.grey)
+        ) .. f(
+            '%s--- Список нарушителей\n%sГорячая клавиша: %s%s',
+            c(color.yellow), c(color.grey), c(color.white), vkeys.id_to_name(vkeys.VK_F2)
+        )
+
+        sampShowDialog(dialog.main, 'Управление скриптом ' .. thisScript().name .. ' ' .. thisScript().version, content, 'Выбрать', 'Закрыть', DIALOG_STYLE_LIST)
+    end)
+
     sampRegisterChatCommand('suspects', function ()
         local text = 'Статус\tНикнейм\tКомментарий'
 

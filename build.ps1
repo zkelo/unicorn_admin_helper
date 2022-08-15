@@ -10,7 +10,9 @@ $CompiledScriptPath = ".\$DistFolder\$CompiledScriptFilename"
 $CompiledScriptGameFolderPath = "$GamePath\moonloader\$CompiledScriptFilename"
 
 <# Код #>
-Write-Output 'Выполняется компиляция скрипта...'
+Get-Content -Encoding UTF8 $ScriptPath | Out-File -Encoding WINDOWS-1251 "$DistFolder\$ScriptFilename"
+
+Write-Output 'Компиляция скрипта...'
 
 if (Test-Path -Path $CompiledScriptPath -PathType leaf)
 {
@@ -18,7 +20,7 @@ if (Test-Path -Path $CompiledScriptPath -PathType leaf)
 }
 
 cd .\luajit
-& '.\luajit.exe' '-b' ".$ScriptPath" ".$CompiledScriptPath"
+& '.\luajit.exe' '-b' "..\$DistFolder\$ScriptFilename" ".$CompiledScriptPath"
 cd ..
 
 if (-not (Test-Path -Path $CompiledScriptPath -PathType leaf))
@@ -31,6 +33,7 @@ else
     Write-Host 'Скрипт успешно скомпилирован' -ForegroundColor Green
 }
 
+Remove-Item -Force "$DistFolder\$ScriptFilename"
 Write-Output 'Копирование скрипта в папку moonloader игры...'
 
 Try

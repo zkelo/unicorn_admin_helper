@@ -35,7 +35,6 @@ local dialog = {
 }
 
 local suspects = {}
-local isPlayerSpectating = false
 
 local data = inicfg.load({
     settings = {
@@ -262,8 +261,4 @@ end
 function samp.onSendCommand(command)
     -- Здесь должен быть обработчик команд
     -- с возможностью добавления собственных
-end
-
-function samp.onTogglePlayerSpectating(state)
-    isPlayerSpectating = state
 end

@@ -7,7 +7,7 @@ local vkeys = require 'vkeys'
 script_name('Unicorn Admin Helper')
 script_author('ZKelo')
 script_description('Скрипт в помощь администратору игрового сервера Unicorn')
-script_version('2.0.5')
+script_version('2.0.0')
 script_version_number(5)
 script_moonloader(26)
 script_dependencies('encoding', 'samp')

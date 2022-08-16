@@ -69,10 +69,6 @@ function c(color)
     return '{' .. string.format('%x', color) .. '}'
 end
 
-function f(s, ...)
-    return string.format(s, ...)
-end
-
 function isEmpty(var)
     return var == nil or #var == 0
 end
@@ -124,10 +120,10 @@ function main()
 
     -- Регистрация команд чата
     sampRegisterChatCommand('uah', function ()
-        local content = f(
+        local content = string.format(
             '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат\n \n',
             c(color.yellow), c(color.green), c(color.grey), c(color.grey)
-        ) .. f(
+        ) .. string.format(
             '%s--- Список нарушителей\n%sГорячая клавиша: %s%s',
             c(color.yellow), c(color.grey), c(color.white), vkeys.id_to_name(vkeys.VK_F2)
         )
@@ -185,14 +181,12 @@ function main()
             delSuspect(nickname)
         end
 
-        local msg = string.format('Игрок %q добавлен в список нарушителей', nickname)
-
         if isEmpty(comment) then
             comment = '(не указан)'
         end
 
         addSuspect(nickname, comment)
-        sampAddChatMessage(msg, color.grey)
+        sampAddChatMessage(string.format('Игрок %q добавлен в список нарушителей', nickname), color.grey)
     end)
 
     -- Регистрация консольных команд

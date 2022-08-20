@@ -310,15 +310,6 @@ function main()
             sampProcessChatInput('/uah')
         end
 
-        --[[ Обработка нажатий клавиш ]]
-        -- Открытие списка нарушителей (F2)
-        if isKeyJustPressed(data.settings.hotkeySuspectsList)
-            and not sampIsDialogActive()
-            and not sampIsDialogClientside()
-        then
-            sampProcessChatInput('/suspects')
-        end
-
         -- Действия при открытых диалогах
         if sampIsDialogActive() and sampIsDialogClientside() then
             -- Диалог со списком нарушителей
@@ -345,13 +336,18 @@ function main()
     end
 end
 
---[[ Обработчики событий ]]
+--[[ Обработка нажатий клавиш ]]
 function onWindowMessage(msg, wparam, lparam)
     if msg == winmsg.WM_KEYDOWN
-        and sampIsDialogActive()
-        and sampIsDialogClientside()
-        and sampGetCurrentDialogId(dialog.settings.hotkey)
-    then
-        keyCapture.id = wparam
+        if sampIsDialogActive()
+            and sampIsDialogClientside()
+            and sampGetCurrentDialogId(dialog.settings.hotkey)
+        then
+            -- Запись нажатой клавиши при назначении клавиши
+            keyCapture.id = wparam
+        elseif wparam == data.settings.hotkeySuspectsList then
+            -- Открытие списка нарушителей
+            sampProcessChatInput('/suspects')
+        end
     end
 end

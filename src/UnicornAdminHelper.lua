@@ -2,6 +2,7 @@
 local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 local vkeys = require 'vkeys'
+local winmsg = require 'windows.message'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -30,10 +31,11 @@ local color = {
 local dialog = {
     settings = {
         id = 100,
+        hotkey = 101,
         maxListitem = 0
     },
     suspects = {
-        list = 101
+        list = 102
     }
 }
 
@@ -50,10 +52,14 @@ local data = inicfg.load({
     suspects = {},
     commands = {}
 }, configFilename)
-
 if data.suspects == nil then
     data.suspects = {}
 end
+
+local keyCapture = {
+    id = nil,
+    setting = nil
+}
 
 --[[ Вспомогательные функции ]]
 function saveData()
@@ -136,7 +142,7 @@ function main()
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
         ) .. string.format(
-            '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат',
+            '%s--- Команды\n%sДобавить команду',
             c(color.yellow), c(color.green), c(color.grey), c(color.grey)
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')
@@ -236,11 +242,65 @@ function main()
             end
         end
 
-        -- Диалог настроек
+        -- Диалог с настройками
+        result, button, listitem = sampHasDialogRespond(dialog.settings.id)
+        if result then
+            if button == 1
+                and (
+                    listitem == 1
+                    or listitem == 4
+                    or listitem == 5
+                    or listitem == 6
+                )
+            then
+                local fnc = ''
+                local currentKey = ''
+
+                if listitem == 1 then
+                    fnc = 'Активация Wallhack в слежке'
+                    currentKey = data.settings.hotkeyWallhack
+                    keyCapture.setting = 'hotkeyWallhack'
+                elseif listitem == 4 then
+                    fnc = 'Открытие списка нарушителей'
+                    currentKey = data.settings.hotkeySuspectsList
+                    keyCapture.setting = 'hotkeySuspectsList'
+                elseif listitem == 5 then
+                    fnc = 'Редактирование записи в списке нарушителей'
+                    currentKey = data.settings.hotkeySuspectsEdit
+                    keyCapture.setting = 'hotkeySuspectsEdit'
+                elseif listitem == 6 then
+                    fnc = 'Удаление из списка нарушителей'
+                    currentKey = data.settings.hotkeySuspectsDelete
+                    keyCapture.setting = 'hotkeySuspectsDelete'
+                end
+
+                local content = string.format(
+                    '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',
+                    c(color.white), c(color.grey), fnc, c(color.white),
+                    c(color.yellow), vkeys.id_to_name(currentKey), c(color.green)
+                )
+
+                sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
+            end
+        end
+
+        -- Диалог назначения клавиши
+        result, button, listitem = sampHasDialogRespond(dialog.settings.hotkey)
+        if result then
+            if button == 1 then
+                data.settings[keyCapture.setting] = keyCapture.id
+                saveData()
+            end
+
+            sampProcessChatInput('/uah')
+        end
 
         --[[ Обработка нажатий клавиш ]]
         -- Открытие списка нарушителей (F2)
-        if isKeyJustPressed(data.settings.hotkeySuspectsList) then
+        if isKeyJustPressed(data.settings.hotkeySuspectsList)
+            and not sampIsDialogActive()
+            and not sampIsDialogClientside()
+        then
             sampProcessChatInput('/suspects')
         end
 
@@ -266,5 +326,16 @@ function main()
                 end
             end
         end
+    end
+end
+
+--[[ Обработчики событий ]]
+function onWindowMessage(msg, wparam, lparam)
+    if msg == winmsg.WM_KEYDOWN
+        and sampIsDialogActive()
+        and sampIsDialogClientside()
+        and sampGetCurrentDialogId(dialog.settings.hotkey)
+    then
+        keyCapture.id = wparam
     end
 end

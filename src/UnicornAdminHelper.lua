@@ -61,6 +61,8 @@ local keyCapture = {
     setting = nil
 }
 
+local suspectsListIndex = nil
+
 --[[ Вспомогательные функции ]]
 function saveData()
     if not inicfg.save(data, configFilename) then
@@ -245,42 +247,48 @@ function main()
         -- Диалог с настройками
         result, button, listitem = sampHasDialogRespond(dialog.settings.id)
         if result then
-            if button == 1
-                and (
-                    listitem == 1
+            if button == 1 then
+                if listitem == 1
                     or listitem == 4
                     or listitem == 5
                     or listitem == 6
-                )
-            then
-                local fnc = ''
-                local currentKey = ''
+                then
+                    local fnc = ''
+                    local currentKey = ''
 
-                if listitem == 1 then
-                    fnc = 'Активация Wallhack в слежке'
-                    currentKey = data.settings.hotkeyWallhack
-                    keyCapture.setting = 'hotkeyWallhack'
-                elseif listitem == 4 then
-                    fnc = 'Открытие списка нарушителей'
-                    currentKey = data.settings.hotkeySuspectsList
-                    keyCapture.setting = 'hotkeySuspectsList'
-                elseif listitem == 5 then
-                    fnc = 'Редактирование записи в списке нарушителей'
-                    currentKey = data.settings.hotkeySuspectsEdit
-                    keyCapture.setting = 'hotkeySuspectsEdit'
-                elseif listitem == 6 then
-                    fnc = 'Удаление из списка нарушителей'
-                    currentKey = data.settings.hotkeySuspectsDelete
-                    keyCapture.setting = 'hotkeySuspectsDelete'
+                    if listitem == 1 then
+                        fnc = 'Активация Wallhack в слежке'
+                        currentKey = data.settings.hotkeyWallhack
+                        keyCapture.setting = 'hotkeyWallhack'
+                    elseif listitem == 4 then
+                        fnc = 'Открытие списка нарушителей'
+                        currentKey = data.settings.hotkeySuspectsList
+                        keyCapture.setting = 'hotkeySuspectsList'
+                    elseif listitem == 5 then
+                        fnc = 'Редактирование записи в списке нарушителей'
+                        currentKey = data.settings.hotkeySuspectsEdit
+                        keyCapture.setting = 'hotkeySuspectsEdit'
+                    elseif listitem == 6 then
+                        fnc = 'Удаление из списка нарушителей'
+                        currentKey = data.settings.hotkeySuspectsDelete
+                        keyCapture.setting = 'hotkeySuspectsDelete'
+                    end
+
+                    local content = string.format(
+                        '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',
+                        c(color.white), c(color.grey), fnc, c(color.white),
+                        c(color.yellow), vkeys.id_to_name(currentKey), c(color.green)
+                    )
+
+                    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Сохранить', 'Назад')
+                elseif listitem == 0
+                    or listitem == 2
+                    or listitem == 3
+                    or listitem == 7
+                    or listitem == 8
+                then
+                    sampProcessChatInput('/uah')
                 end
-
-                local content = string.format(
-                    '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',
-                    c(color.white), c(color.grey), fnc, c(color.white),
-                    c(color.yellow), vkeys.id_to_name(currentKey), c(color.green)
-                )
-
-                sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
             end
         end
 

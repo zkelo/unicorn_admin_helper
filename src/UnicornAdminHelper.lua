@@ -38,7 +38,11 @@ local suspects = {}
 
 local data = inicfg.load({
     settings = {
-        autoPageSize = 0
+        autoPageSize = 0,
+        hotkeyWallhack = vkeys.VK_F3,
+        hotkeySuspectsList = vkeys.VK_F2,
+        hotkeySuspectsDelete = vkeys.VK_DELETE,
+        hotkeySuspectsEdit = vkeys.VK_SPACE
     },
     suspects = {},
     commands = {}
@@ -121,14 +125,19 @@ function main()
     -- Регистрация команд чата
     sampRegisterChatCommand('uah', function ()
         local content = string.format(
-            '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат\n \n',
-            c(color.yellow), c(color.green), c(color.grey), c(color.grey)
+            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
+            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeyWallhack)
         ) .. string.format(
-            '%s--- Список нарушителей\n%sГорячая клавиша: %s%s',
-            c(color.yellow), c(color.grey), c(color.white), vkeys.id_to_name(vkeys.VK_F2)
+            '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
+            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
+            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
+            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
+        ) .. string.format(
+            '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат',
+            c(color.yellow), c(color.green), c(color.grey), c(color.grey)
         )
 
-        sampShowDialog(dialog.main, 'Управление скриптом ' .. thisScript().name .. ' ' .. thisScript().version, content, 'Выбрать', 'Закрыть', DIALOG_STYLE_LIST)
+        sampShowDialog(dialog.main, c(color.system) .. 'Управление скриптом ' .. thisScript().name .. ' ' .. thisScript().version, content, 'Выбрать', 'Закрыть', DIALOG_STYLE_LIST)
     end)
 
     sampRegisterChatCommand('suspects', function ()
@@ -225,7 +234,7 @@ function main()
 
         --[[ Обработка нажатий клавиш ]]
         -- Открытие списка нарушителей (F2)
-        if isKeyJustPressed(vkeys.VK_F2) then
+        if isKeyJustPressed(data.settings.hotkeySuspectsList) then
             sampProcessChatInput('/suspects')
         end
 
@@ -235,11 +244,11 @@ function main()
             local nickname = getSuspectNicknameByIndex(listitem)
 
             if nickname ~= nil then
-                if isKeyJustPressed(vkeys.VK_DELETE) then
+                if isKeyJustPressed(data.settings.hotkeySuspectsDelete) then
                     -- Удаление из списка
                     delSuspect(nickname)
                     sampProcessChatInput('/suspects')
-                elseif isKeyJustPressed(vkeys.VK_SPACE) then
+                elseif isKeyJustPressed(data.settings.hotkeySuspectsEdit) then
                     -- Изменение комментария
                     sampCloseCurrentDialogWithButton(0)
                     sampProcessChatInput('/su')
@@ -249,10 +258,4 @@ function main()
             end
         end
     end
-end
-
---[[ Обработчики событий ]]
-function samp.onSendCommand(command)
-    -- Здесь должен быть обработчик команд
-    -- с возможностью добавления собственных
 end

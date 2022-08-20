@@ -238,22 +238,25 @@ function main()
             sampProcessChatInput('/suspects')
         end
 
-        -- Действия при открытом диалоге со списком нарушителей
-        if sampIsDialogActive() and sampIsDialogClientside() and sampGetCurrentDialogId(dialog.suspects.list) then
-            local listitem = sampGetCurrentDialogListItem()
-            local nickname = getSuspectNicknameByIndex(listitem)
+        -- Действия при открытых диалогах
+        if sampIsDialogActive() and sampIsDialogClientside() then
+            -- Диалог со списком нарушителей
+            if sampGetCurrentDialogId(dialog.suspects.list) then
+                local listitem = sampGetCurrentDialogListItem()
+                local nickname = getSuspectNicknameByIndex(listitem)
 
-            if nickname ~= nil then
-                if isKeyJustPressed(data.settings.hotkeySuspectsDelete) then
-                    -- Удаление из списка
-                    delSuspect(nickname)
-                    sampProcessChatInput('/suspects')
-                elseif isKeyJustPressed(data.settings.hotkeySuspectsEdit) then
-                    -- Изменение комментария
-                    sampCloseCurrentDialogWithButton(0)
-                    sampProcessChatInput('/su')
-                    sampSetChatInputEnabled(true)
-                    sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                if nickname ~= nil then
+                    if isKeyJustPressed(data.settings.hotkeySuspectsDelete) then
+                        -- Удаление из списка
+                        delSuspect(nickname)
+                        sampProcessChatInput('/suspects')
+                    elseif isKeyJustPressed(data.settings.hotkeySuspectsEdit) then
+                        -- Изменение комментария
+                        sampCloseCurrentDialogWithButton(0)
+                        sampProcessChatInput('/su')
+                        sampSetChatInputEnabled(true)
+                        sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                    end
                 end
             end
         end

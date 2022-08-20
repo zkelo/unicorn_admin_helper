@@ -287,7 +287,7 @@ function main()
                         c(color.yellow), vkeys.id_to_name(currentKey), c(color.green)
                     )
 
-                    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Сохранить', 'Назад')
+                    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
                 elseif listitem == 0
                     or listitem == 2
                     or listitem == 3

@@ -338,7 +338,7 @@ end
 
 --[[ Обработка нажатий клавиш ]]
 function onWindowMessage(msg, wparam, lparam)
-    if msg == winmsg.WM_KEYDOWN
+    if msg == winmsg.WM_KEYDOWN then
         if sampIsDialogActive()
             and sampIsDialogClientside()
             and sampGetCurrentDialogId(dialog.settings.hotkey)

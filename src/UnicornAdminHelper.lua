@@ -58,7 +58,8 @@ end
 
 local keyCapture = {
     id = nil,
-    setting = nil
+    setting = nil,
+    fnc = nil
 }
 
 local suspectsListItemIndex = nil
@@ -114,6 +115,16 @@ function getSuspectNicknameByIndex(index)
     end
 
     return nil
+end
+
+function showHotkeyCaptureDialog()
+    local content = string.format(
+        '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',
+        c(color.white), c(color.grey), keyCapture.fnc, c(color.white),
+        c(color.yellow), vkeys.id_to_name(keyCapture.id), c(color.green)
+    )
+
+    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
 end
 
 --[[ Главные функции ]]
@@ -253,49 +264,38 @@ function main()
 
         -- Диалог с настройками
         result, button, listitem = sampHasDialogRespond(dialog.settings.id)
-        if result then
-            if button == 1 then
-                if listitem == 1
-                    or listitem == 4
-                    or listitem == 5
-                    or listitem == 6
-                then
-                    local fnc = ''
-                    local currentKey = ''
-
-                    if listitem == 1 then
-                        fnc = 'Активация Wallhack в слежке'
-                        currentKey = data.settings.hotkeyWallhack
-                        keyCapture.setting = 'hotkeyWallhack'
-                    elseif listitem == 4 then
-                        fnc = 'Открытие списка нарушителей'
-                        currentKey = data.settings.hotkeySuspectsList
-                        keyCapture.setting = 'hotkeySuspectsList'
-                    elseif listitem == 5 then
-                        fnc = 'Редактирование записи в списке нарушителей'
-                        currentKey = data.settings.hotkeySuspectsEdit
-                        keyCapture.setting = 'hotkeySuspectsEdit'
-                    elseif listitem == 6 then
-                        fnc = 'Удаление из списка нарушителей'
-                        currentKey = data.settings.hotkeySuspectsDelete
-                        keyCapture.setting = 'hotkeySuspectsDelete'
-                    end
-
-                    local content = string.format(
-                        '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',
-                        c(color.white), c(color.grey), fnc, c(color.white),
-                        c(color.yellow), vkeys.id_to_name(currentKey), c(color.green)
-                    )
-
-                    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
-                elseif listitem == 0
-                    or listitem == 2
-                    or listitem == 3
-                    or listitem == 7
-                    or listitem == 8
-                then
-                    sampProcessChatInput('/uah')
+        if result and button == 1 then
+            if listitem == 1
+                or listitem == 4
+                or listitem == 5
+                or listitem == 6
+            then
+                if listitem == 1 then
+                    keyCapture.fnc = 'Активация Wallhack в слежке'
+                    keyCapture.id = data.settings.hotkeyWallhack
+                    keyCapture.setting = 'hotkeyWallhack'
+                elseif listitem == 4 then
+                    keyCapture.fnc = 'Открытие списка нарушителей'
+                    keyCapture.id = data.settings.hotkeySuspectsList
+                    keyCapture.setting = 'hotkeySuspectsList'
+                elseif listitem == 5 then
+                    keyCapture.fnc = 'Редактирование записи в списке нарушителей'
+                    keyCapture.id = data.settings.hotkeySuspectsEdit
+                    keyCapture.setting = 'hotkeySuspectsEdit'
+                elseif listitem == 6 then
+                    keyCapture.fnc = 'Удаление из списка нарушителей'
+                    keyCapture.id = data.settings.hotkeySuspectsDelete
+                    keyCapture.setting = 'hotkeySuspectsDelete'
                 end
+
+                showHotkeyCaptureDialog()
+            elseif listitem == 0
+                or listitem == 2
+                or listitem == 3
+                or listitem == 7
+                or listitem == 8
+            then
+                sampProcessChatInput('/uah')
             end
         end
 
@@ -345,6 +345,7 @@ function onWindowMessage(msg, wparam, lparam)
         then
             -- Запись нажатой клавиши при назначении клавиши
             keyCapture.id = wparam
+            showHotkeyCaptureDialog()
         elseif wparam == data.settings.hotkeySuspectsList then
             -- Открытие списка нарушителей
             sampProcessChatInput('/suspects')

@@ -28,7 +28,10 @@ local color = {
 }
 
 local dialog = {
-    main = 100,
+    settings = {
+        id = 100,
+        maxListitem = 0
+    },
     suspects = {
         list = 101
     }
@@ -136,8 +139,9 @@ function main()
             '%s--- Команды\n%sДобавить команду\n/mq %s- выдача мута за упом. родных\n/mm %s- выдача мута за мат',
             c(color.yellow), c(color.green), c(color.grey), c(color.grey)
         )
+        _, dialog.settings.maxListitem = content:gsub('\n', '')
 
-        sampShowDialog(dialog.main, c(color.system) .. 'Управление скриптом ' .. thisScript().name .. ' ' .. thisScript().version, content, 'Выбрать', 'Закрыть', DIALOG_STYLE_LIST)
+        sampShowDialog(dialog.settings.id, c(color.system) .. 'Управление скриптом ' .. thisScript().name .. ' ' .. thisScript().version, content, 'Выбрать', 'Закрыть', DIALOG_STYLE_LIST)
     end)
 
     sampRegisterChatCommand('suspects', function ()
@@ -231,6 +235,8 @@ function main()
                 end
             end
         end
+
+        -- Диалог настроек
 
         --[[ Обработка нажатий клавиш ]]
         -- Открытие списка нарушителей (F2)

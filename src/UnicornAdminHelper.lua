@@ -61,7 +61,7 @@ local keyCapture = {
     setting = nil
 }
 
-local suspectsListIndex = nil
+local suspectsListItemIndex = nil
 
 --[[ Вспомогательные функции ]]
 function saveData()
@@ -208,6 +208,13 @@ function main()
 
         addSuspect(nickname, comment)
         sampAddChatMessage(string.format('Игрок %q добавлен в список нарушителей', nickname), color.grey)
+
+        if suspectsListItemIndex ~= nil then
+            sampProcessChatInput('/suspects')
+            sampSetCurrentDialogListItem(suspectsListItemIndex)
+
+            suspectsListItemIndex = nil
+        end
     end)
 
     -- Регистрация консольных команд
@@ -330,6 +337,7 @@ function main()
                         sampProcessChatInput('/su')
                         sampSetChatInputEnabled(true)
                         sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                        suspectsListItemIndex = sampGetCurrentDialogListItem()
                     end
                 end
             end

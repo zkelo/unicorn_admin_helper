@@ -181,7 +181,7 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        if suspectsListShownCounter >= 21 or suspectsListShownCounter == 0 then
+        if suspectsListShownCounter >= 31 or suspectsListShownCounter == 0 then
             sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно удалить игрока из списка нарушителей', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_DELETE), c(color.white)), color.green)
             sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно изменить комментарий', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_SPACE), c(color.white)), color.green)
 

@@ -63,6 +63,7 @@ local keyCapture = {
 }
 
 local suspectsListItemIndex = nil
+local backwardToSettingsFromHotkeyDialog = false
 
 --[[ Вспомогательные функции ]]
 function saveData()
@@ -274,18 +275,22 @@ function main()
                     keyCapture.fnc = 'Активация Wallhack в слежке'
                     keyCapture.id = data.settings.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
+                    backwardToSettingsFromHotkeyDialog = true
                 elseif listitem == 4 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
                     keyCapture.id = data.settings.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
+                    backwardToSettingsFromHotkeyDialog = true
                 elseif listitem == 5 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
                     keyCapture.id = data.settings.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
+                    backwardToSettingsFromHotkeyDialog = true
                 elseif listitem == 6 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
                     keyCapture.id = data.settings.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
+                    backwardToSettingsFromHotkeyDialog = true
                 end
 
                 showHotkeyCaptureDialog()
@@ -307,7 +312,10 @@ function main()
                 saveData()
             end
 
-            sampProcessChatInput('/uah')
+            if backwardToSettingsFromHotkeyDialog then
+                backwardToSettingsFromHotkeyDialog = false
+                sampProcessChatInput('/uah')
+            end
         end
 
         -- Действия при открытых диалогах

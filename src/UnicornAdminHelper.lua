@@ -249,7 +249,10 @@ function main()
         wait(0)
 
         --[[ Обработка нажатий клавиш ]]
-        if isKeyJustPressed(data.settings.hotkeySuspectsList) then
+        if not sampIsChatInputActive()
+            and not sampIsDialogActive()
+            and isKeyJustPressed(data.settings.hotkeySuspectsList)
+        then
             sampProcessChatInput('/suspects')
         end
 
@@ -326,7 +329,7 @@ function main()
         -- Действия при открытых диалогах
         if sampIsDialogActive() and sampIsDialogClientside() then
             -- Диалог со списком нарушителей
-            if sampGetCurrentDialogId(dialog.suspects.list) then
+            if sampGetCurrentDialogId() == dialog.suspects.list then
                 local listitem = sampGetCurrentDialogListItem()
                 local nickname = getSuspectNicknameByIndex(listitem)
 
@@ -351,14 +354,13 @@ end
 
 --[[ Обработка нажатий клавиш ]]
 function onWindowMessage(msg, wparam, lparam)
-    if msg == winmsg.WM_KEYDOWN then
-        if sampIsDialogActive()
-            and sampIsDialogClientside()
-            and sampGetCurrentDialogId(dialog.settings.hotkey)
-        then
-            -- Запись нажатой клавиши при назначении клавиши
-            keyCapture.id = wparam
-            showHotkeyCaptureDialog()
-        end
+    if msg == winmsg.WM_KEYDOWN
+        and sampIsDialogActive()
+        and sampIsDialogClientside()
+        and sampGetCurrentDialogId() == dialog.settings.hotkey
+    then
+        -- Запись нажатой клавиши при назначении клавиши
+        keyCapture.id = wparam
+        showHotkeyCaptureDialog()
     end
 end

@@ -248,6 +248,11 @@ function main()
     while true do
         wait(0)
 
+        --[[ Обработка нажатий клавиш ]]
+        if isKeyJustPressed(data.settings.hotkeySuspectsList) then
+            sampProcessChatInput('/suspects')
+        end
+
         --[[ Обработка диалогов ]]
         -- Диалог со списком нарушителей
         local result, button, listitem = sampHasDialogRespond(dialog.suspects.list)
@@ -354,9 +359,6 @@ function onWindowMessage(msg, wparam, lparam)
             -- Запись нажатой клавиши при назначении клавиши
             keyCapture.id = wparam
             showHotkeyCaptureDialog()
-        elseif wparam == data.settings.hotkeySuspectsList then
-            -- Открытие списка нарушителей
-            sampProcessChatInput('/suspects')
         end
     end
 end

@@ -62,6 +62,7 @@ local keyCapture = {
     fnc = nil
 }
 
+local suspectsListShownCounter = 0
 local suspectsListItemIndex = nil
 local backwardToSettingsFromHotkeyDialog = false
 
@@ -180,9 +181,14 @@ function main()
             list = '\nСписок пуст\t\t'
         end
 
-        sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно удалить игрока из списка нарушителей', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_DELETE), c(color.white)), color.green)
-        sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно изменить комментарий', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_SPACE), c(color.white)), color.green)
+        if suspectsListShownCounter >= 21 or suspectsListShownCounter == 0 then
+            sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно удалить игрока из списка нарушителей', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_DELETE), c(color.white)), color.green)
+            sampAddChatMessage(string.format('Подсказка: %sС помощью клавиши %s%s%s можно изменить комментарий', c(color.white), c(color.yellow), vkeys.id_to_name(vkeys.VK_SPACE), c(color.white)), color.green)
 
+            suspectsListShownCounter = 1
+        end
+
+        suspectsListShownCounter = suspectsListShownCounter + 1
         sampShowDialog(dialog.suspects.list, 'Список нарушителей', text .. list, 'Следить', 'Закрыть', DIALOG_STYLE_TABLIST_HEADERS)
     end)
 

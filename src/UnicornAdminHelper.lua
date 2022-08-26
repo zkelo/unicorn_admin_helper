@@ -149,17 +149,17 @@ function main()
     -- Регистрация команд чата
     sampRegisterChatCommand('uah', function ()
         local content = string.format(
-            -- 0                      2                        3
+            -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
             c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeyWallhack)
         ) .. string.format(
-            -- 4                       5                              6                             7                       8
+            -- 3                       4                              5                             6                       7
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
             c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
         ) .. string.format(
-            -- 9            10
+            -- 8            9
             '%s--- Команды\n%sДобавить команду',
             c(color.yellow), c(color.green), c(color.grey), c(color.grey)
         )

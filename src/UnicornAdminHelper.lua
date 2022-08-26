@@ -65,6 +65,7 @@ local keyCapture = {
 local suspectsListShownCounter = 0
 local suspectsListItemIndex = nil
 local backwardToSettingsFromHotkeyDialog = false
+local serverSuspects = {}
 
 --[[ Вспомогательные функции ]]
 function saveData()
@@ -368,5 +369,17 @@ function onWindowMessage(msg, wparam, lparam)
         -- Запись нажатой клавиши при назначении клавиши
         keyCapture.id = wparam
         showHotkeyCaptureDialog()
+    end
+end
+
+--[[ Обработка входящих сообщений от сервера ]]
+function samp.onServerMessage(_, text)
+    -- Серверное сообщение о подозрении в читерстве
+    if text:find('/подозревается%sв%sчитерстве/') ~= nil then
+        local openBracket = text:find('[', 20)
+        local closeBracket = text:find(']', 20)
+
+        local suspectId = text:sub(openBracket + 1, closeBracket - 1)
+        sampAddChatMessage(string.format('Обнаружен читер - ID: %d', suspectId), color.system)
     end
 end

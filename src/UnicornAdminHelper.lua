@@ -398,9 +398,11 @@ function onWindowMessage(msg, wparam, lparam)
 end
 
 --[[ Обработка входящих сообщений от сервера ]]
-function samp.onServerMessage(_, text)
+function samp.onServerMessage(messageColor, text)
+    messageColor = string.format('%x', messageColor):sub(-8, -3)
+
     -- Серверное сообщение о подозрении в читерстве
-    if text:find('/подозревается%sв%sчитерстве/') ~= nil then
+    if messageColor == 'f3333f' then
         local openBracket = text:find('[', 20)
         local closeBracket = text:find(']', 20)
 

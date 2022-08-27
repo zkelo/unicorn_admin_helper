@@ -320,8 +320,17 @@ function main()
             then
                 sampProcessChatInput('/uah')
             elseif listitem == 9 then
-                local content = ''
+                local content = 'Текст\tОписание\tКод'
+                content = string.format('%s\n%sДобавить команду\t\t', content, c(color.green))
 
+                for basetext, info in pairs(data.commands) do
+                    content = string.format(
+                        '%s\n/%s\t%s\t%s',
+                        content, info.text, info.description, info.code
+                    )
+                end
+
+                backwardToSettingsFromCurrentDialog = true
                 sampShowDialog(dialog.commands.id, 'Настройка команд', content, 'Выбрать', 'Назад', DIALOG_STYLE_TABLIST_HEADERS)
             end
         end
@@ -334,6 +343,14 @@ function main()
                 saveData()
             end
 
+            if backwardToSettingsFromCurrentDialog then
+                backwardToSettingsFromCurrentDialog = false
+                sampProcessChatInput('/uah')
+            end
+        end
+
+        result, button, listitem = sampHasDialogRespond(dialog.commands.id)
+        if result then
             if backwardToSettingsFromCurrentDialog then
                 backwardToSettingsFromCurrentDialog = false
                 sampProcessChatInput('/uah')

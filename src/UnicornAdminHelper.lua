@@ -78,12 +78,22 @@ function saveData()
     end
 end
 
+function prepareSuspectName(name, toSave)
+    if toSave then
+        return name:gsub('%.', '~')
+    end
+
+    return name:gsub('~', '%.')
+end
+
 function addSuspect(name, comment)
+    name = prepareSuspectName(name, true)
     data.suspects[name] = comment
     saveData()
 end
 
 function delSuspect(name)
+    name = prepareSuspectName(name, true)
     data.suspects[name] = nil
     saveData()
 end
@@ -114,6 +124,8 @@ function getSuspectNicknameByIndex(index)
     local i = 0
 
     for nickname, _ in pairs(data.suspects) do
+        nickname = prepareSuspectName(nickname, false)
+
         if i == index then
             return nickname
         end
@@ -178,6 +190,8 @@ function main()
 
         local list = ''
         for nickname, comment in pairs(data.suspects) do
+            nickname = prepareSuspectName(nickname, false)
+
             if comment == '(не указан)' then
                 comment = c(color.lightGrey) .. comment
             end

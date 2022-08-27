@@ -130,7 +130,7 @@ function showHotkeyCaptureDialog()
         c(color.yellow), vkeys.id_to_name(keyCapture.id), c(color.green)
     )
 
-    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Выбрать', 'Назад')
+    sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Сохранить', 'Назад')
 end
 
 --[[ Главные функции ]]
@@ -321,7 +321,7 @@ function main()
                 sampProcessChatInput('/uah')
             elseif listitem == 9 then
                 local content = 'Текст\tОписание\tКод'
-                content = string.format('%s\n%sДобавить команду\t\t', content, c(color.green))
+                content = string.format('%s\n%sДобавить команду', content, c(color.green))
 
                 for basetext, info in pairs(data.commands) do
                     content = string.format(

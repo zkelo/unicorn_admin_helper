@@ -35,7 +35,8 @@ local dialog = {
         maxListitem = 0
     },
     commands = {
-        id = 103
+        id = 103,
+        add = 104
     },
     suspects = {
         list = 102
@@ -148,7 +149,7 @@ function main()
 
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
-    sampAddChatMessage('Для просмотра справки введите /uah', color.yellow)
+    sampAddChatMessage('Для открытия настроек введите /uah', color.yellow)
 
     -- Регистрация команд чата
     sampRegisterChatCommand('uah', function ()

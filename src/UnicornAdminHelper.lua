@@ -34,6 +34,9 @@ local dialog = {
         hotkey = 101,
         maxListitem = 0
     },
+    commands = {
+        id = 103
+    },
     suspects = {
         list = 102
     }
@@ -64,7 +67,7 @@ local keyCapture = {
 
 local suspectsListShownCounter = 0
 local suspectsListItemIndex = nil
-local backwardToSettingsFromHotkeyDialog = false
+local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
 --[[ Вспомогательные функции ]]
@@ -161,8 +164,8 @@ function main()
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8            9
-            '%s--- Команды\n%sДобавить команду',
-            c(color.yellow), c(color.green), c(color.grey), c(color.grey)
+            '%s--- Команды\nНастройка команд',
+            c(color.yellow)
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')
 
@@ -307,7 +310,7 @@ function main()
                     keyCapture.setting = 'hotkeySuspectsDelete'
                 end
 
-                backwardToSettingsFromHotkeyDialog = true
+                backwardToSettingsFromCurrentDialog = true
                 showHotkeyCaptureDialog()
             elseif listitem == 0
                 or listitem == 2
@@ -316,6 +319,10 @@ function main()
                 or listitem == 8
             then
                 sampProcessChatInput('/uah')
+            elseif listitem == 9 then
+                local content = ''
+
+                sampShowDialog(dialog.commands.id, 'Настройка команд', content, 'Выбрать', 'Назад', DIALOG_STYLE_TABLIST_HEADERS)
             end
         end
 
@@ -327,8 +334,8 @@ function main()
                 saveData()
             end
 
-            if backwardToSettingsFromHotkeyDialog then
-                backwardToSettingsFromHotkeyDialog = false
+            if backwardToSettingsFromCurrentDialog then
+                backwardToSettingsFromCurrentDialog = false
                 sampProcessChatInput('/uah')
             end
         end

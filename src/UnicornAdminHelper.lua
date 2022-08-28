@@ -19,12 +19,12 @@ local configFilename = 'UnicornAdminHelper'
 local color = {
     white = 0xffffff,
     red = 0xf07474,
+    brightRed = 0xff0000,
     green = 0x86e153,
     yellow = 0xf3d176,
     grey = 0xc6c6c6,
     lightGrey = 0xe5e5e5,
     darkGrey = 0x444444,
-
     system = 0xaaccff
 }
 
@@ -373,15 +373,19 @@ function main()
                 local content = string.format(
                     -- 0                                  1                                          2
                     '%s--- Текст команды %s(обязательно)\nНажмите сюда, чтобы указать текст команды\n \n',
-                    c(color.yellow), c(color.red)
+                    c(color.yellow), c(color.brightRed)
                 ) .. string.format(
                     -- 3                                4                                        5
                     '%s--- Код команды %s(обязательно)\nНажмите сюда, чтобы указать код команды\n \n',
-                    c(color.yellow), c(color.red)
+                    c(color.yellow), c(color.brightRed)
                 ) .. string.format(
-                    -- 6             7
-                    '%s--- Описание\nНажмите сюда, чтобы добавить описание команды',
+                    -- 6             7                                              8
+                    '%s--- Описание\nНажмите сюда, чтобы добавить описание команды\n \n',
                     c(color.yellow)
+                ) .. string.format(
+                    -- 9           10
+                    '%s--- Статус\n%sВыключена',
+                    c(color.yellow), c(color.red)
                 )
 
                 backwardToSettingsFromCurrentDialog = false

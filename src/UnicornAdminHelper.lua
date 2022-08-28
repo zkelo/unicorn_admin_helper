@@ -36,7 +36,9 @@ local dialog = {
     },
     commands = {
         id = 103,
-        add = 104
+        add = {
+            id = 104
+        }
     },
     suspects = {
         list = 102
@@ -364,15 +366,49 @@ function main()
             end
         end
 
+        -- Диалог со списком команд
         result, button, listitem = sampHasDialogRespond(dialog.commands.id)
         if result then
+            if button == 1 then
+                local content = string.format(
+                    -- 0                                  1                                          2
+                    '%s--- Текст команды %s(обязательно)\nНажмите сюда, чтобы указать текст команды\n \n',
+                    c(color.yellow), c(color.red)
+                ) .. string.format(
+                    -- 3                                4                                        5
+                    '%s--- Код команды %s(обязательно)\nНажмите сюда, чтобы указать код команды\n \n',
+                    c(color.yellow), c(color.red)
+                ) .. string.format(
+                    -- 6             7
+                    '%s--- Описание\nНажмите сюда, чтобы добавить описание команды',
+                    c(color.yellow)
+                )
+
+                backwardToSettingsFromCurrentDialog = false
+                sampShowDialog(dialog.commands.add.id, 'Добавление команды', content, 'Добавить', 'Назад', DIALOG_STYLE_LIST)
+            end
+
             if backwardToSettingsFromCurrentDialog then
                 backwardToSettingsFromCurrentDialog = false
                 sampProcessChatInput('/uah')
             end
         end
 
-        -- Действия при открытых диалогах
+        -- TODO Доделать
+        --[[ result, button, listitem = sampHasDialogRespond(dialog.commands.add.id)
+        if result then
+            if button == 1 then
+                if listitem == 0
+                    or listitem == 2
+                    or listitem == 3
+                    or listitem == 5
+                    or listitem == 6
+                then
+                end
+            end
+        end ]]
+
+        --[[ Действия при открытых диалогах ]]
         if sampIsDialogActive() and sampIsDialogClientside() then
             -- Диалог со списком нарушителей
             if sampGetCurrentDialogId() == dialog.suspects.list then

@@ -171,10 +171,6 @@ function main()
             c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
-        ) .. string.format(
-            -- 8
-            '%s--- Команды',
-            c(color.yellow)
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')
 
@@ -327,7 +323,6 @@ function main()
                 or listitem == 2
                 or listitem == 3
                 or listitem == 7
-                or listitem == 8
             then
                 sampProcessChatInput('/uah')
             end

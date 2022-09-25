@@ -119,6 +119,9 @@ local suspectsListItemIndex = nil
 local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
+--[[ Инициализация скрипта ]]
+data.commands = parseCommands(data.commands)
+
 --[[ Вспомогательные функции ]]
 -- Сохранение данных (состояния) скрипта
 function saveData()
@@ -206,6 +209,29 @@ function showHotkeyCaptureDialog()
     )
 
     sampShowDialog(dialog.settings.hotkey, c(color.system) .. 'Назначение клавиши', content, 'Сохранить', 'Назад')
+end
+
+-- Обрабатывает список команд, собирая из него таблицу
+function parseCommands(commands)
+    local list = {}
+
+    for c in commands do
+        t, a, i = c:match('%/(%w+)%s(%{[pnsd]%:.+%})%s-%s(.+)')
+        g = {}
+
+        for p, i in a:gmatch('%{([pnsd]+):([^%}]+)%}') do
+            table.insert(g, {param = p, info = i})
+        end
+
+        table.insert(list, {
+            raw = c,
+            text = t,
+            args = g,
+            info = i
+        }, t)
+    end
+
+    return list
 end
 
 --[[ Главные функции ]]

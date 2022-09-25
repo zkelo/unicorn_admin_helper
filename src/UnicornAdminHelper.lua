@@ -216,20 +216,26 @@ end
 function parseCommands(commands)
     local list = {}
 
-    for c in commands do
+    for _, c in ipairs(commands) do
         t, a, i = c:match('%/(%w+)%s(%{[pnsd]%:.+%})%s-%s(.+)')
-        g = {}
-
-        for p, i in a:gmatch('%{([pnsd]+):([^%}]+)%}') do
-            table.insert(g, {param = p, info = i})
+        if t == nil and a == nil and i == nil then
+            t, i = c:match('%/(%w+)%s-%s(.+)')
         end
 
-        table.insert(list, {
+        if a ~= nil then
+            g = {}
+
+            for p, j in a:gmatch('%{([pnsd]+):([^%}]+)%}') do
+                table.insert(g, {param = p, info = j})
+            end
+        end
+
+        list[t] = {
             raw = c,
             text = t,
             args = g,
             info = i
-        }, t)
+        }
     end
 
     return list

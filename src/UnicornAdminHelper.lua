@@ -218,7 +218,7 @@ function parseCommands(commands)
 
     for _, c in ipairs(commands) do
         t, a, i = c:match('%/(%w+)%s(%{[pnsd]%:.+%})%s-%s(.+)')
-        if t == nil and a == nil and i == nil then
+        if t == nil then
             t, i = c:match('%/(%w+)%s-%s(.+)')
         end
 

@@ -14,8 +14,10 @@ script_moonloader(26)
 script_dependencies('encoding', 'samp')
 
 --[[ Переменные и значения по умолчанию ]]
+-- Название конфигурационного файла
 local configFilename = 'UnicornAdminHelper'
 
+-- Цвета
 local color = {
     white = 0xffffff,
     red = 0xf07474,
@@ -28,6 +30,7 @@ local color = {
     system = 0xaaccff
 }
 
+-- Идентификаторы диалогов
 local dialog = {
     settings = {
         id = 100,
@@ -39,17 +42,24 @@ local dialog = {
     }
 }
 
-local suspects = {}
-
+-- Данные (состояние) скрипта
 local data = inicfg.load({
+    -- Настройки
     settings = {
+        -- Автоматический pagesize
         autoPageSize = 0,
+        -- Горячая клавиша включения\отключения Wallhack-а
         hotkeyWallhack = vkeys.VK_F3,
+        -- Горячая клавиша открытия списка нарушителей
         hotkeySuspectsList = vkeys.VK_F2,
+        -- Горячая клавиша удаления записи из списка нарушителей
         hotkeySuspectsDelete = vkeys.VK_DELETE,
+        -- Горячая клавиша редактирования записи в списке нарушителей
         hotkeySuspectsEdit = vkeys.VK_SPACE
     },
+    -- Список нарушителей
     suspects = {},
+    -- Команды
     commands = {
         '/a {p:ID игрока} {s:Ответ} - ответить на репорт',
         '/z {p:ID игрока} - следить за игроком',
@@ -78,24 +88,33 @@ if data.suspects == nil then
     data.suspects = {}
 end
 
+-- Переменная-состояние для диалога назначения горячей клавиши
 local keyCapture = {
     id = nil,
     setting = nil,
     fnc = nil
 }
 
+-- Количество открытий списка нарушителей пользователем скрипта
+-- Используется для того чтобы не выводить подсказку по горячим клавишам
+-- редактирования и удаления записей в списке нарушителей каждый раз
+-- при его открытии, тем самым не флудить подсказкой,
+-- если пользователь часто открывает список
 local suspectsListShownCounter = 0
+
 local suspectsListItemIndex = nil
 local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
 --[[ Вспомогательные функции ]]
+-- Сохранение данных (состояния) скрипта
 function saveData()
     if not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
 end
 
+-- Подготовка никнейма игрока, добавляемого в список нарушителей
 function prepareSuspectName(name, toSave)
     if toSave then
         return name:gsub('%.', '~')
@@ -104,30 +123,37 @@ function prepareSuspectName(name, toSave)
     return name:gsub('~', '%.')
 end
 
+-- Добавление игрока в список нарушителей
 function addSuspect(name, comment)
     name = prepareSuspectName(name, true)
     data.suspects[name] = comment
     saveData()
 end
 
+-- Удаление игрока из списка нарушителей
 function delSuspect(name)
     name = prepareSuspectName(name, true)
     data.suspects[name] = nil
     saveData()
 end
 
+-- Вспомогательная функция для вставки цвета в сообщение
 function c(color)
     return '{' .. string.format('%x', color) .. '}'
 end
 
+-- Проверяет, является ли значение переданной переменной пустым
 function isEmpty(var)
     return var == nil or #var == 0
 end
 
+-- Проверяет, находится ли игрок с определённым никнеймом в сети
 function isPlayerWithNicknameOnline(nickname)
     return getPlayerIdByNickname(nickname) ~= nil
 end
 
+-- Получает ID игрока по его никнейму
+-- Если игрок не в сети, возвращает `nil`
 function getPlayerIdByNickname(nickname)
     for id = 0, sampGetMaxPlayerId(false) do
         if sampIsPlayerConnected(id) and sampGetPlayerNickname(id) == nickname then
@@ -138,6 +164,9 @@ function getPlayerIdByNickname(nickname)
     return nil
 end
 
+-- Возвращает никнейм игрока из списка нарушителей
+-- по индексу его записи в списке
+-- Если игрок не в сети, возвращает `nil`
 function getSuspectNicknameByIndex(index)
     local i = 0
 
@@ -154,6 +183,8 @@ function getSuspectNicknameByIndex(index)
     return nil
 end
 
+-- Выводит на экран пользователя диалог назначения
+-- горячей клавиши для какой-либо функции
 function showHotkeyCaptureDialog()
     local content = string.format(
         '%sВы меняете клавишу для функции:\n%s%s%s\n\nТекущая клавиша: %s%s\n\n%sНажмите любую клавишу чтобы сохранить её\nв качестве горячей клавиши для указанной функции',

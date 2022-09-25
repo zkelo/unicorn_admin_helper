@@ -222,9 +222,8 @@ function parseCommands(commands)
             t, i = c:match('%/(%w+)%s-%s(.+)')
         end
 
+        g = {}
         if a ~= nil then
-            g = {}
-
             for p, j in a:gmatch('%{([pnsd]+):([^%}]+)%}') do
                 table.insert(g, {param = p, info = j})
             end

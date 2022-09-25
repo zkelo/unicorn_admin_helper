@@ -120,6 +120,7 @@ local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
 --[[ Инициализация скрипта ]]
+-- Загрузка команд из конфига
 data.commands = parseCommands(data.commands)
 
 --[[ Вспомогательные функции ]]

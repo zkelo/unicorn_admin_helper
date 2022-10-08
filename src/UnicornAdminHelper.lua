@@ -257,7 +257,7 @@ function main()
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
     sampAddChatMessage('Для открытия настроек введите /uah', color.yellow)
 
-    -- Регистрация команд чата
+    -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
         local content = string.format(
             -- 0                      1                        2

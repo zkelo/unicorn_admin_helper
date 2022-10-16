@@ -360,7 +360,7 @@ function main()
     end)
 
     -- Регистрация собственных команд
-    for text, data in pairs(data.commands) do
+    for text, _ in pairs(data.commands) do
         sampRegisterChatCommand(text, function (args)
             handleCustomCommand(text, args)
         end)

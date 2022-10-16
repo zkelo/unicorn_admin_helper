@@ -119,10 +119,6 @@ local suspectsListItemIndex = nil
 local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
---[[ Инициализация скрипта ]]
--- Загрузка команд из конфига
-data.commands = parseCommands(data.commands)
-
 --[[ Вспомогательные функции ]]
 -- Сохранение данных (состояния) скрипта
 function saveData()
@@ -252,6 +248,10 @@ function main()
     while not isSampAvailable() do
         wait(100)
     end
+
+    --[[ Инициализация скрипта ]]
+    -- Загрузка команд из конфига
+    data.commands = parseCommands(data.commands)
 
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)

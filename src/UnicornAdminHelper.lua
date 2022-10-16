@@ -236,6 +236,14 @@ function parseCommands(commands)
     return list
 end
 
+-- Обрабатывает собственные команды
+function handleCustomCommand(text, args)
+    sampAddChatMessage(string.format(
+        'Введена собственная команда %s: %q',
+        text, args
+    ), color.white)
+end
+
 --[[ Главные функции ]]
 function main()
     -- Если SAMP или SAMPFUNCS не загружен,
@@ -350,6 +358,13 @@ function main()
             suspectsListItemIndex = nil
         end
     end)
+
+    -- Регистрация собственных команд
+    for text, data in pairs(data.commands) do
+        sampRegisterChatCommand(text, function (args)
+            handleCustomCommand(text, args)
+        end)
+    end
 
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)

@@ -256,6 +256,10 @@ function main()
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
     sampAddChatMessage('Для открытия настроек введите /uah', color.yellow)
+    sampAddChatMessage(string.format(
+        'Скрипт использует Skeletal Wallhack%s от %sAppleThe%s и %shnnssy',
+        c(color.grey), c(color.green), c(color.grey), c(color.green)
+    ), color.grey)
 
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()

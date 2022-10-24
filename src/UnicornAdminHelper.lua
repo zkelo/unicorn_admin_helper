@@ -213,14 +213,19 @@ function parseCommands(commands)
     local list = {}
 
     for _, c in ipairs(commands) do
-        t, a, i = c:match('%/(%w+)%s(%{[pnsd]%:.+%})%s-%s(.+)')
+        local l, r = c:match('([^%>]+)>(.+)')
+
+        local t, a, i = l:match('%/(%w+)%s(%{[dst]%:.+%})%s-%s(.+)')
         if t == nil then
             t, i = c:match('%/(%w+)%s-%s(.+)')
+            a = nil
         end
 
-        g = {}
+        local g = nil
         if a ~= nil then
-            for p, j in a:gmatch('%{([pnsd]+):([^%}]+)%}') do
+            g = {}
+
+            for p, j in a:gmatch('%{([dst]+):([^%}]+)%}') do
                 table.insert(g, {param = p, info = j})
             end
         end
@@ -229,7 +234,8 @@ function parseCommands(commands)
             raw = c,
             text = t,
             args = g,
-            info = i
+            info = i,
+            result = r
         }
     end
 

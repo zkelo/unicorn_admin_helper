@@ -239,7 +239,7 @@ end
 -- Обрабатывает собственные команды
 function handleCustomCommand(text, args)
     --[[ Проверка на существование команды ]]
-    local cmd = cmds[text]
+    local cmd = data.commands[text]
     if cmd == nil then
         sampAddChatMessage(string.format('Ошибка: %sНе удалось найти команду', c(color.white)), color.red)
         return

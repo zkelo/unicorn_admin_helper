@@ -238,10 +238,59 @@ end
 
 -- Обрабатывает собственные команды
 function handleCustomCommand(text, args)
-    sampAddChatMessage(string.format(
-        'Введена собственная команда %s: %q',
-        text, args
-    ), color.white)
+    --[[ Проверка на существование команды ]]--
+    local cmd = cmds[text]
+    if cmd == nil then
+        sampAddChatMessage(string.format('Ошибка: %sНе удалось найти команду', c(color.white)), color.red)
+        return
+    end
+
+    --[[ Генерация подсказки ]]--
+    local hint = ''
+    if not isEmpty(cmd.args) then
+        local ps = ''
+        for _, p in ipairs(cmd.args) do
+            ps = string.format('%s[%s] ', ps, p.info)
+        end
+
+        hint = string.format(
+            'Подсказка: %s/%s %s%s%s',
+            c(color.white), text, ps, c(color.grey), cmd.info
+        )
+
+        if isEmpty(args) then
+            sampAddChatMessage(hint, color.green)
+            return
+        end
+
+        --[[ Обработка аргументов ]]--
+        local re, l = '', #cmd.args
+        for i, p in ipairs(cmd.args) do
+            local s = '%s%s'
+            if i ~= l then
+                s = s .. '%%s'
+            end
+
+            re = string.format(s, re, cmdArgs[p.param])
+        end
+
+        args = {args:match(re)}
+        if #args ~= #cmd.args then
+            sampAddChatMessage(hint, color.green)
+            return
+        end
+    end
+
+    --[[ Сборка строки с результирующей командой ]]--
+    local result = '/' .. cmd.result:gsub('[,:]', ' ')
+
+    if not isEmpty(args) then
+        for i, p in ipairs(args) do
+            result = result:gsub('$' .. i, p)
+        end
+    end
+
+    sampSendChat(result)
 end
 
 --[[ Главные функции ]]

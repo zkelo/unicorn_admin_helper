@@ -238,14 +238,14 @@ end
 
 -- Обрабатывает собственные команды
 function handleCustomCommand(text, args)
-    --[[ Проверка на существование команды ]]--
+    --[[ Проверка на существование команды ]]
     local cmd = cmds[text]
     if cmd == nil then
         sampAddChatMessage(string.format('Ошибка: %sНе удалось найти команду', c(color.white)), color.red)
         return
     end
 
-    --[[ Генерация подсказки ]]--
+    --[[ Генерация подсказки ]]
     local hint = ''
     if not isEmpty(cmd.args) then
         local ps = ''
@@ -263,7 +263,7 @@ function handleCustomCommand(text, args)
             return
         end
 
-        --[[ Обработка аргументов ]]--
+        --[[ Обработка аргументов ]]
         local re, l = '', #cmd.args
         for i, p in ipairs(cmd.args) do
             local s = '%s%s'
@@ -281,7 +281,7 @@ function handleCustomCommand(text, args)
         end
     end
 
-    --[[ Сборка строки с результирующей командой ]]--
+    --[[ Сборка строки с результирующей командой ]]
     local result = '/' .. cmd.result:gsub('[,:]', ' ')
 
     if not isEmpty(args) then
@@ -290,6 +290,7 @@ function handleCustomCommand(text, args)
         end
     end
 
+    --[[ Отправка ]]
     sampSendChat(result)
 end
 

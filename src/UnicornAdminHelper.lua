@@ -334,7 +334,7 @@ function main()
 
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
-        local commands = ''
+        local commands = '\n'
         for _, cmd in ipairs(data.commands) do
             local ps = ''
             for _, param in ipairs(cmd.args) do
@@ -342,7 +342,7 @@ function main()
             end
 
             commands = string.format(
-                '%s\n/%s %s%s%s',
+                '%s/%s %s%s%s\n',
                 commands, cmd.text, ps, c(color.grey), cmd.info
             )
         end

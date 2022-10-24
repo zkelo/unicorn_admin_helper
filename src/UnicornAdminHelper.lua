@@ -334,6 +334,19 @@ function main()
 
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
+        local commands = ''
+        for _, cmd in ipairs(data.commands) do
+            local ps = ''
+            for _, param in ipairs(cmd.args) do
+                ps = string.format('%s[%s] ', ps, param.info)
+            end
+
+            commands = string.format(
+                '%s\n/%s %s%s%s',
+                commands, cmd.text, ps, c(color.grey), cmd.info
+            )
+        end
+
         local content = string.format(
             -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
@@ -344,6 +357,10 @@ function main()
             c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
+        ) .. string.format(
+            -- 8
+            '%s--- Команды%s',
+            c(color.yellow), commands
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')
 

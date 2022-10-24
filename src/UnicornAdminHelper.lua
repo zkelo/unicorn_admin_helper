@@ -122,7 +122,14 @@ local serverSuspects = {}
 --[[ Вспомогательные функции ]]
 -- Сохранение данных (состояния) скрипта
 function saveData()
-    if not inicfg.save(data, configFilename) then
+    local d = data
+    local cl = {}
+    for k, c in pairs(d.commands) do
+        cl[k] = c.raw
+    end
+    d.commands = cl
+
+    if not inicfg.save(d, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
 end

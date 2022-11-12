@@ -334,8 +334,13 @@ function main()
 
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
-        local commands = '\n'
-        for _, cmd in ipairs(data.commands) do
+        local commands = ''
+
+        print('/uah c -', data.commands)
+        for text, cmd in pairs(data.commands) do
+            print('/uah -', text, cmd)
+
+            sampAddChatMessage(text, -1)
             local ps = ''
             for _, param in ipairs(cmd.args) do
                 ps = string.format('%s[%s] ', ps, param.info)
@@ -343,8 +348,12 @@ function main()
 
             commands = string.format(
                 '%s/%s %s%s%s\n',
-                commands, cmd.text, ps, c(color.grey), cmd.info
+                commands, text, ps, c(color.grey), cmd.info
             )
+        end
+
+        if isEmpty(commands) then
+            commands = 'Список команд пуст'
         end
 
         local content = string.format(
@@ -359,7 +368,7 @@ function main()
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8
-            '%s--- Команды%s',
+            '%s--- Команды\n%s',
             c(color.yellow), commands
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')

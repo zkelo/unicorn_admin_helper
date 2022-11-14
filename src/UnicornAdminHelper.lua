@@ -284,7 +284,7 @@ function handleCustomCommand(text, args)
                 s = s .. '%%s'
             end
 
-            re = string.format(s, re, cmdArgs[p.param])
+            re = string.format(s, re, cmd.args[p.param])
         end
 
         args = {args:match(re)}

@@ -344,8 +344,11 @@ function main()
         for text, cmd in pairs(data.commands) do
             sampAddChatMessage(text, -1)
             local ps = ''
-            for _, param in ipairs(cmd.args) do
-                ps = string.format('%s[%s] ', ps, param.info)
+
+            if not isEmpty(cmd.args) then
+                for _, param in ipairs(cmd.args) do
+                    ps = string.format('%s[%s] ', ps, param.info)
+                end
             end
 
             commands = string.format(

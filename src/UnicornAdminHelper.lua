@@ -229,16 +229,19 @@ function parseCommands(commands)
     for _, c in ipairs(commands) do
         local l, r = c:match('([^%>]+)>(.+)')
 
-        local t, a, i = l:match('%/(%w+)%s(%{[dst]%:.+%})%s-%s(.+)')
+        local m = ''
+        for x, _ in pairs(cmdParams) do
+            m = m .. x
+        end
+
+        local t, a, i = l:match('%/(%w+)%s(%{[' .. m .. ']%:.+%})%s-%s(.+)')
         if t == nil then
             t, i = c:match('%/(%w+)%s-%s(.+)')
             a = nil
         end
 
-        local g = nil
+        local g = {}
         if a ~= nil then
-            g = {}
-
             for p, j in a:gmatch('%{([dst]+):([^%}]+)%}') do
                 table.insert(g, {param = p, info = j})
             end
@@ -342,7 +345,6 @@ function main()
         local commands = ''
 
         for text, cmd in pairs(data.commands) do
-            sampAddChatMessage(text, -1)
             local ps = ''
 
             if not isEmpty(cmd.args) then
@@ -352,8 +354,8 @@ function main()
             end
 
             commands = string.format(
-                '%s/%s %s%s%s\n',
-                commands, text, ps, c(color.grey), cmd.info
+                '%s%s/%s %s%s%s%s\n',
+                commands, c(color.grey), text, c(color.lightGrey), ps, c(color.white), cmd.info
             )
         end
 

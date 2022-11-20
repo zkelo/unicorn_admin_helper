@@ -286,13 +286,10 @@ function handleCustomCommand(text, args)
             end
 
             re = string.format(s, re, cmd.args[p.param])
+            print('Сборка RE:', i, r)
         end
 
-        print('args до =', args)
-        print('re', re)
-        print(args:match(re))
         args = {args:match(re)}
-        print('args после =', args[0])
         if #args ~= #cmd.args then
             sampAddChatMessage(hint, color.green)
             return
@@ -341,10 +338,7 @@ function main()
     sampRegisterChatCommand('uah', function ()
         local commands = ''
 
-        print('/uah c -', data.commands)
         for text, cmd in pairs(data.commands) do
-            print('/uah -', text, cmd)
-
             sampAddChatMessage(text, -1)
             local ps = ''
             for _, param in ipairs(cmd.args) do

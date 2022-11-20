@@ -234,11 +234,13 @@ function parseCommands(commands)
             m = m .. x
         end
 
+        --[[ Эту часть кода можно отрефакторить! ]]
         local t, a, i = l:match('%/(%w+)%s(%{[' .. m .. ']%:.+%})%s-%s(.+)')
         if t == nil then
             t, i = l:match('%/(%w+)%s-%s(.+)')
             a = nil
         end
+        --[[ /Эту часть кода можно отрефакторить! ]]
 
         local g = {}
         if a ~= nil then

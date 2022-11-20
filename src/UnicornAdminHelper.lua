@@ -277,7 +277,8 @@ function handleCustomCommand(text, args)
         end
 
         --[[ Обработка аргументов ]]
-        local re, l = '', #cmd.args
+        local re = ''
+        local l = #cmd.args
         for i, p in ipairs(cmd.args) do
             local s = '%s%s'
             if i ~= l then
@@ -287,7 +288,11 @@ function handleCustomCommand(text, args)
             re = string.format(s, re, cmd.args[p.param])
         end
 
+        print('args до =', args)
+        print('re', re)
+        print(args:match(re))
         args = {args:match(re)}
+        print('args после =', args[0])
         if #args ~= #cmd.args then
             sampAddChatMessage(hint, color.green)
             return

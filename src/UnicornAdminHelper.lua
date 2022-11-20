@@ -282,7 +282,7 @@ function handleCustomCommand(text, args)
         for i, p in ipairs(cmd.args) do
             re = string.format(
                 '%s%s%%s' .. (i == l and '*' or '+'),
-                re, cmdArgs[p.param]
+                re, cmd.args[p.param]
             )
         end
 

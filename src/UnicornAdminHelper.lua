@@ -538,6 +538,7 @@ function main()
                 or listitem == 2
                 or listitem == 3
                 or listitem == 7
+                or listitem >= 8
             then
                 sampProcessChatInput('/uah')
             end

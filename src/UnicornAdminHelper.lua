@@ -101,6 +101,13 @@ if data.suspects == nil then
     data.suspects = {}
 end
 
+-- Параметры команд
+local cmdParams = {
+    d = '(%d+)',
+    s = '([^%s]+)',
+    t = '(.+)'
+}
+
 -- Переменная-состояние для диалога назначения горячей клавиши
 local keyCapture = {
     id = nil,
@@ -277,12 +284,11 @@ function handleCustomCommand(text, args)
         end
 
         --[[ Обработка аргументов ]]
-        local re = ''
-        local l = #cmd.args
+        local re, l = '', #cmd.args
         for i, p in ipairs(cmd.args) do
             re = string.format(
                 '%s%s%%s' .. (i == l and '*' or '+'),
-                re, cmd.args[p.param]
+                re, cmdParams[p.param]
             )
         end
 

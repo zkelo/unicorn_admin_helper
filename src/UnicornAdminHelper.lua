@@ -280,13 +280,10 @@ function handleCustomCommand(text, args)
         local re = ''
         local l = #cmd.args
         for i, p in ipairs(cmd.args) do
-            local s = '%s%s'
-            if i ~= l then
-                s = s .. '%%s'
-            end
-
-            re = string.format(s, re, cmd.args[p.param])
-            print('Сборка RE:', i, r)
+            re = string.format(
+                '%s%s%%s' .. (i == l and '*' or '+'),
+                re, cmdArgs[p.param]
+            )
         end
 
         args = {args:match(re)}

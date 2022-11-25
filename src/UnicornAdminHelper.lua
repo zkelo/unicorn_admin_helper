@@ -136,7 +136,6 @@ function saveData()
     for k, c in pairs(d.commands) do
         cl[k] = c.raw
     end
-    d.commands = cl
 
     if not inicfg.save(d, configFilename) then
         print('Не удалось сохранить данные в файл')
@@ -393,6 +392,7 @@ function main()
             commands = 'Список команд пуст'
         end
 
+        local _, commandsCount = commands:gsub('\n', '')
         local content = string.format(
             -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
@@ -405,8 +405,8 @@ function main()
             c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8
-            '%s--- Команды\n%s',
-            c(color.yellow), commands
+            '%s--- Команды %s(%d)\n%s',
+            c(color.yellow), c(color.green), commandsCount, commands
         )
         _, dialog.settings.maxListitem = content:gsub('\n', '')
 

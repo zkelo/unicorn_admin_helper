@@ -132,17 +132,15 @@ local serverSuspects = {}
 --[[ Вспомогательные функции ]]
 -- Сохранение данных (состояния) скрипта
 function saveData()
-    local cl = {}
-    for k, c in pairs(data.commands) do
+    local d, cl = deepcopy(data), {}
+    for k, c in pairs(d.commands) do
         cl[k] = c.raw
     end
-    data.commands = cl
+    d.commands = cl
 
-    if not inicfg.save(data, configFilename) then
+    if not inicfg.save(d, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
-
-    data.commands = parseCommands(data.commands)
 end
 
 -- Подготовка никнейма игрока, добавляемого в список нарушителей
@@ -193,6 +191,25 @@ function getPlayerIdByNickname(nickname)
     end
 
     return nil
+end
+
+-- Копирует таблицы (и не только) любых уровней
+-- Взято отсюда: http://lua-users.org/wiki/CopyTable
+function deepcopy(orig)
+    local orig_type = type(orig)
+    local copy
+
+    if orig_type == 'table' then
+        copy = {}
+        for orig_key, orig_value in next, orig, nil do
+            copy[deepcopy(orig_key)] = deepcopy(orig_value)
+        end
+        setmetatable(copy, deepcopy(getmetatable(orig)))
+    else -- number, string, boolean, etc
+        copy = orig
+    end
+
+    return copy
 end
 
 -- Возвращает никнейм игрока из списка нарушителей

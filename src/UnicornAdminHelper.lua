@@ -132,16 +132,17 @@ local serverSuspects = {}
 --[[ Вспомогательные функции ]]
 -- Сохранение данных (состояния) скрипта
 function saveData()
-    local d = data
     local cl = {}
-    for k, c in pairs(d.commands) do
+    for k, c in pairs(data.commands) do
         cl[k] = c.raw
     end
     d.commands = cl
 
-    if not inicfg.save(d, configFilename) then
+    if not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')
     end
+
+    data.commands = parseCommands(data.commands)
 end
 
 -- Подготовка никнейма игрока, добавляемого в список нарушителей

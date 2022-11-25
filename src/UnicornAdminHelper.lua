@@ -344,12 +344,6 @@ function main()
     -- Загрузка команд из конфига
     data.commands = parseCommands(data.commands)
 
-    -- Создание конфига при первом запуске
-    --
-    -- ВАЖНО!!! Функция `saveData()` может вызываться ТОЛЬКО ПОСЛЕ того,
-    -- как будет обработан список команд с помощью функции `parseCommands()`!
-    saveData()
-
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
     sampAddChatMessage('Для открытия настроек введите /uah', color.yellow)

@@ -245,7 +245,7 @@ function parseCommands(commands)
 
         local g = {}
         if a ~= nil then
-            for p, j in a:gmatch('%{([dst]+):([^%}]+)%}') do
+            for p, j in a:gmatch('%{([' .. m .. ']+):([^%}]+)%}') do
                 table.insert(g, {param = p, info = j})
             end
         end

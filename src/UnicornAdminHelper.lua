@@ -17,6 +17,9 @@ script_dependencies('encoding', 'samp')
 -- Название конфигурационного файла
 local configFilename = 'UnicornAdminHelper'
 
+-- Отладка
+local debug = false
+
 -- Цвета
 local color = {
     white = 0xffffff,
@@ -311,6 +314,15 @@ function handleCustomCommand(text, args)
         end
     end
 
+    --[[ Если включена отладка, то нужно просто вывести результат в чат ]]
+    if debug then
+        sampAddChatMessage(string.format(
+            'Отладка: %sРезультат команды: %s%q',
+            c(color.white), c(color.yellow), result
+        ), color.yellow)
+        return
+    end
+
     --[[ Отправка ]]
     sampSendChat(result)
 end
@@ -465,7 +477,18 @@ function main()
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version | suspects]')
+            print('uah [[num_]version | suspects | debug]')
+        elseif arg == 'debug' then
+            debug = not debug
+
+            local state = ''
+            if debug then
+                state = 'включена'
+            else
+                state = 'выключена'
+            end
+
+            print('Отладка ' .. state)
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)
         elseif arg == 'num_version' then

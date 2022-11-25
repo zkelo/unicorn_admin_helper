@@ -136,7 +136,7 @@ function saveData()
     for k, c in pairs(data.commands) do
         cl[k] = c.raw
     end
-    d.commands = cl
+    data.commands = cl
 
     if not inicfg.save(data, configFilename) then
         print('Не удалось сохранить данные в файл')

@@ -522,7 +522,12 @@ function main()
     -- Регистрация собственных команд
     for text, _ in pairs(settings.commands) do
         sampRegisterChatCommand(text, function (args)
-            handleCustomCommand(text, args)
+            if not pcall(handleCustomCommand, text, args) then
+                sampAddChatMessage(string.format(
+                    'Ошибка: %sВо время выполнения команды %q произошла ошибка',
+                    c(color.white), text
+                ), color.red)
+            end
         end)
     end
 

@@ -45,10 +45,13 @@ local dialog = {
     }
 }
 
--- Данные (состояние) скрипта
-local data = inicfg.load({
+-- Настройки скрипта
+local settings = {}
+
+-- Настройки скрипта по умолчанию
+local defaults = {
     -- Настройки
-    settings = {
+    hotkeys = {
         -- Автоматический pagesize
         autoPageSize = 0,
         -- Клавиша включения\отключения Wallhack-а
@@ -99,9 +102,10 @@ local data = inicfg.load({
         '/ub {s:Никнейм игрока} - разбанить>unban:$1',
         '/ubl {s:Никнейм игрока} - разблокировать аккаунт>unblock:$1'
     }
-}, configFilename)
-if data.suspects == nil then
-    data.suspects = {}
+}
+
+if settings.suspects == nil then
+    settings.suspects = {}
 end
 
 -- Параметры команд
@@ -154,14 +158,14 @@ end
 -- Добавление игрока в список нарушителей
 function addSuspect(name, comment)
     name = prepareSuspectName(name, true)
-    data.suspects[name] = comment
+    settings.suspects[name] = comment
     saveData()
 end
 
 -- Удаление игрока из списка нарушителей
 function delSuspect(name)
     name = prepareSuspectName(name, true)
-    data.suspects[name] = nil
+    settings.suspects[name] = nil
     saveData()
 end
 
@@ -217,7 +221,7 @@ end
 function getSuspectNicknameByIndex(index)
     local i = 0
 
-    for nickname, _ in pairs(data.suspects) do
+    for nickname, _ in pairs(settings.suspects) do
         nickname = prepareSuspectName(nickname, false)
 
         if i == index then
@@ -282,7 +286,7 @@ end
 -- Обрабатывает собственные команды
 function handleCustomCommand(text, args)
     --[[ Проверка на существование команды ]]
-    local cmd = data.commands[text]
+    local cmd = settings.commands[text]
     if cmd == nil then
         sampAddChatMessage(string.format('Ошибка: %sНе удалось найти команду', c(color.white)), color.red)
         return
@@ -359,7 +363,7 @@ function main()
 
     --[[ Инициализация скрипта ]]
     -- Загрузка команд из конфига
-    data.commands = parseCommands(data.commands)
+    settings.commands = parseCommands(settings.commands)
 
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
@@ -373,7 +377,7 @@ function main()
     sampRegisterChatCommand('uah', function ()
         local commands = ''
 
-        for text, cmd in pairs(data.commands) do
+        for text, cmd in pairs(settings.commands) do
             local ps = ''
 
             if not isEmpty(cmd.args) then
@@ -396,13 +400,13 @@ function main()
         local content = string.format(
             -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeyWallhack)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.settings.hotkeyWallhack)
         ) .. string.format(
             -- 3                       4                              5                             6                       7
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
-            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
-            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsList),
+            c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsEdit),
+            c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8
             '%s--- Команды %s(%d)\n%s',
@@ -417,7 +421,7 @@ function main()
         local text = 'Статус\tНикнейм\tКомментарий'
 
         local list = ''
-        for nickname, comment in pairs(data.suspects) do
+        for nickname, comment in pairs(settings.suspects) do
             nickname = prepareSuspectName(nickname, false)
 
             if comment == '(не указан)' then
@@ -466,7 +470,7 @@ function main()
             return
         end
 
-        if not isEmpty(data.suspects[lowerNickname]) then
+        if not isEmpty(settings.suspects[lowerNickname]) then
             delSuspect(nickname)
         end
 
@@ -486,7 +490,7 @@ function main()
     end)
 
     -- Регистрация собственных команд
-    for text, _ in pairs(data.commands) do
+    for text, _ in pairs(settings.commands) do
         sampRegisterChatCommand(text, function (args)
             handleCustomCommand(text, args)
         end)
@@ -512,7 +516,7 @@ function main()
         elseif arg == 'num_version' then
             print(tostring(thisScript().version_num))
         elseif arg == 'suspects' then
-            for name, comment in pairs(data.suspects) do
+            for name, comment in pairs(settings.suspects) do
                 print(string.format('%q: %q', name, comment))
             end
         end
@@ -525,7 +529,7 @@ function main()
         --[[ Обработка нажатий клавиш ]]
         if not sampIsChatInputActive()
             and not sampIsDialogActive()
-            and isKeyJustPressed(data.settings.hotkeySuspectsList)
+            and isKeyJustPressed(settings.settings.hotkeySuspectsList)
         then
             sampProcessChatInput('/suspects')
         end
@@ -555,19 +559,19 @@ function main()
             then
                 if listitem == 1 then
                     keyCapture.fnc = 'Активация Wallhack в слежке'
-                    keyCapture.id = data.settings.hotkeyWallhack
+                    keyCapture.id = settings.settings.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
                 elseif listitem == 4 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsList
+                    keyCapture.id = settings.settings.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
                 elseif listitem == 5 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsEdit
+                    keyCapture.id = settings.settings.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
                 elseif listitem == 6 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsDelete
+                    keyCapture.id = settings.settings.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
                 end
 
@@ -586,7 +590,7 @@ function main()
         result, button, listitem = sampHasDialogRespond(dialog.settings.hotkey)
         if result then
             if button == 1 then
-                data.settings[keyCapture.setting] = keyCapture.id
+                settings.settings[keyCapture.setting] = keyCapture.id
                 saveData()
             end
 
@@ -604,16 +608,16 @@ function main()
                 local nickname = getSuspectNicknameByIndex(listitem)
 
                 if nickname ~= nil then
-                    if isKeyJustPressed(data.settings.hotkeySuspectsDelete) then
+                    if isKeyJustPressed(settings.settings.hotkeySuspectsDelete) then
                         -- Удаление из списка
                         delSuspect(nickname)
                         sampProcessChatInput('/suspects')
-                    elseif isKeyJustPressed(data.settings.hotkeySuspectsEdit) then
+                    elseif isKeyJustPressed(settings.settings.hotkeySuspectsEdit) then
                         -- Изменение комментария
                         sampCloseCurrentDialogWithButton(0)
                         sampProcessChatInput('/su')
                         sampSetChatInputEnabled(true)
-                        sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                        sampSetChatInputText(string.format('/su %s %s', nickname, settings.suspects[nickname]))
                         suspectsListItemIndex = sampGetCurrentDialogListItem()
                     end
                 end

@@ -15,7 +15,7 @@ script_dependencies('encoding', 'samp')
 
 --[[ Переменные и значения по умолчанию ]]
 -- Название конфигурационного файла
-local configFilename = 'UnicornAdminHelper'
+local configFilepath = './config/UnicornAdminHelper.json'
 
 -- Отладка
 local debug = false
@@ -46,7 +46,8 @@ local dialog = {
 }
 
 -- Настройки скрипта
-local settings = {}
+-- Они загружаются в функции `main()` до цикла
+local settings
 
 -- Настройки скрипта по умолчанию
 local defaults = {
@@ -139,10 +140,6 @@ function saveData()
     local d, cl = deepcopy(data), {}
     for k, c in pairs(d.commands) do
         cl[k] = c.raw
-    end
-
-    if not inicfg.save(d, configFilename) then
-        print('Не удалось сохранить данные в файл')
     end
 end
 
@@ -400,13 +397,13 @@ function main()
         local content = string.format(
             -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.settings.hotkeyWallhack)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack)
         ) .. string.format(
             -- 3                       4                              5                             6                       7
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsList),
-            c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsEdit),
-            c(color.grey), vkeys.id_to_name(settings.settings.hotkeySuspectsDelete)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList),
+            c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
+            c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8
             '%s--- Команды %s(%d)\n%s',
@@ -529,7 +526,7 @@ function main()
         --[[ Обработка нажатий клавиш ]]
         if not sampIsChatInputActive()
             and not sampIsDialogActive()
-            and isKeyJustPressed(settings.settings.hotkeySuspectsList)
+            and isKeyJustPressed(settings.hotkeys.hotkeySuspectsList)
         then
             sampProcessChatInput('/suspects')
         end
@@ -559,19 +556,19 @@ function main()
             then
                 if listitem == 1 then
                     keyCapture.fnc = 'Активация Wallhack в слежке'
-                    keyCapture.id = settings.settings.hotkeyWallhack
+                    keyCapture.id = settings.hotkeys.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
                 elseif listitem == 4 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
-                    keyCapture.id = settings.settings.hotkeySuspectsList
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
                 elseif listitem == 5 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
-                    keyCapture.id = settings.settings.hotkeySuspectsEdit
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
                 elseif listitem == 6 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
-                    keyCapture.id = settings.settings.hotkeySuspectsDelete
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
                 end
 
@@ -590,7 +587,7 @@ function main()
         result, button, listitem = sampHasDialogRespond(dialog.settings.hotkey)
         if result then
             if button == 1 then
-                settings.settings[keyCapture.setting] = keyCapture.id
+                settings.hotkeys[keyCapture.setting] = keyCapture.id
                 saveData()
             end
 
@@ -608,11 +605,11 @@ function main()
                 local nickname = getSuspectNicknameByIndex(listitem)
 
                 if nickname ~= nil then
-                    if isKeyJustPressed(settings.settings.hotkeySuspectsDelete) then
+                    if isKeyJustPressed(settings.hotkeys.hotkeySuspectsDelete) then
                         -- Удаление из списка
                         delSuspect(nickname)
                         sampProcessChatInput('/suspects')
-                    elseif isKeyJustPressed(settings.settings.hotkeySuspectsEdit) then
+                    elseif isKeyJustPressed(settings.hotkeys.hotkeySuspectsEdit) then
                         -- Изменение комментария
                         sampCloseCurrentDialogWithButton(0)
                         sampProcessChatInput('/su')

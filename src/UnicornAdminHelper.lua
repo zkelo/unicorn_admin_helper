@@ -3,6 +3,7 @@ local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
+local io = require 'io'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -15,7 +16,7 @@ script_dependencies('encoding', 'samp')
 
 --[[ Переменные и значения по умолчанию ]]
 -- Название конфигурационного файла
-local configFilepath = './config/UnicornAdminHelper.json'
+local configFilepath = getWorkingDirectory() .. '/config/UnicornAdminHelper.json'
 
 -- Отладка
 local debug = false
@@ -45,16 +46,12 @@ local dialog = {
     }
 }
 
--- Настройки скрипта
--- Они загружаются в функции `main()` до цикла
-local settings
-
 -- Настройки скрипта по умолчанию
 local defaults = {
-    -- Настройки
+    -- Автоматический pagesize
+    autoPageSize = 0,
+    -- Горячие клавиши
     hotkeys = {
-        -- Автоматический pagesize
-        autoPageSize = 0,
         -- Клавиша включения\отключения Wallhack-а
         hotkeyWallhack = vkeys.VK_F3,
         -- Клавиша открытия списка нарушителей
@@ -105,9 +102,9 @@ local defaults = {
     }
 }
 
-if settings.suspects == nil then
-    settings.suspects = {}
-end
+-- Настройки скрипта
+-- Они загружаются в функции `main()` до цикла
+local settings
 
 -- Параметры команд
 local cmdParams = {
@@ -135,12 +132,42 @@ local backwardToSettingsFromCurrentDialog = false
 local serverSuspects = {}
 
 --[[ Вспомогательные функции ]]
--- Сохранение данных (состояния) скрипта
-function saveData()
-    local d, cl = deepcopy(data), {}
-    for k, c in pairs(d.commands) do
+-- Загрузка настроек скрипта
+function loadSettings()
+    local configFile = io.open(configFilepath)
+    if configFile == nil then
+        settings = defaults
+        return
+    end
+
+    settings = decodeJson(configFile:read('*a'))
+
+    --[[ Проверка корректности значений настроек ]]
+    -- Список нарушителей должен быть таблицей
+    if settings.suspects == nil then
+        settings.suspects = {}
+    end
+
+    -- autoPageSize может иметь только следующие значения:
+    -- 0 или от 10 до 20 включительно
+    if settings.autoPageSize ~= 0 and (settings.autoPageSize < 10 or settings.autoPageSize > 20) then
+        settings.autoPageSize = 0
+    end
+
+    configFile:close()
+end
+
+-- Сохранение настроек скрипта
+function saveSettings()
+    local s, cl = deepcopy(settings), {}
+    for k, c in pairs(s.commands) do
         cl[k] = c.raw
     end
+    s.commands = cl
+
+    local configFile = io.open(configFilepath, 'w')
+    configFile:write(encodeJson(s))
+    configFile:close()
 end
 
 -- Подготовка никнейма игрока, добавляемого в список нарушителей
@@ -156,14 +183,14 @@ end
 function addSuspect(name, comment)
     name = prepareSuspectName(name, true)
     settings.suspects[name] = comment
-    saveData()
+    saveSettings()
 end
 
 -- Удаление игрока из списка нарушителей
 function delSuspect(name)
     name = prepareSuspectName(name, true)
     settings.suspects[name] = nil
-    saveData()
+    saveSettings()
 end
 
 -- Вспомогательная функция для вставки цвета в сообщение
@@ -359,8 +386,14 @@ function main()
     end
 
     --[[ Инициализация скрипта ]]
-    -- Загрузка команд из конфига
+    -- Загрузка настроек из конфига
+    loadSettings()
+
+    -- Обработка команд
     settings.commands = parseCommands(settings.commands)
+
+    -- Создание конфига при первом запуске скрипта
+    saveSettings()
 
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
@@ -496,7 +529,7 @@ function main()
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version | suspects | debug]')
+            print('uah [[num_]version | suspects | debug | settings]')
         elseif arg == 'debug' then
             debug = not debug
 
@@ -508,6 +541,16 @@ function main()
             end
 
             print('Отладка ' .. state)
+        elseif arg == 'settings' then
+            for name, value in pairs(settings) do
+                if type(value) == 'table' then
+                    for subname, subvalue in pairs(value) do
+                        print(name, ':', subname, '=', subvalue)
+                    end
+                else
+                    print(name, '=', value)
+                end
+            end
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)
         elseif arg == 'num_version' then
@@ -588,7 +631,7 @@ function main()
         if result then
             if button == 1 then
                 settings.hotkeys[keyCapture.setting] = keyCapture.id
-                saveData()
+                saveSettings()
             end
 
             if backwardToSettingsFromCurrentDialog then

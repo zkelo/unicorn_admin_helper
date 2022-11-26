@@ -154,6 +154,9 @@ function loadSettings()
         settings.autoPageSize = 0
     end
 
+    -- Обработка команд
+    settings.commands = parseCommands(settings.commands)
+
     configFile:close()
 end
 
@@ -358,9 +361,6 @@ function main()
     --[[ Инициализация скрипта ]]
     -- Загрузка настроек из конфига
     loadSettings()
-
-    -- Обработка команд
-    settings.commands = parseCommands(settings.commands)
 
     -- Создание конфига при первом запуске скрипта
     saveSettings()

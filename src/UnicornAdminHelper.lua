@@ -170,25 +170,14 @@ function saveSettings()
     configFile:close()
 end
 
--- Подготовка никнейма игрока, добавляемого в список нарушителей
-function prepareSuspectName(name, toSave)
-    if toSave then
-        return name:gsub('%.', '~')
-    end
-
-    return name:gsub('~', '%.')
-end
-
 -- Добавление игрока в список нарушителей
 function addSuspect(name, comment)
-    name = prepareSuspectName(name, true)
     settings.suspects[name] = comment
     saveSettings()
 end
 
 -- Удаление игрока из списка нарушителей
 function delSuspect(name)
-    name = prepareSuspectName(name, true)
     settings.suspects[name] = nil
     saveSettings()
 end
@@ -246,8 +235,6 @@ function getSuspectNicknameByIndex(index)
     local i = 0
 
     for nickname, _ in pairs(settings.suspects) do
-        nickname = prepareSuspectName(nickname, false)
-
         if i == index then
             return nickname
         end
@@ -452,8 +439,6 @@ function main()
 
         local list = ''
         for nickname, comment in pairs(settings.suspects) do
-            nickname = prepareSuspectName(nickname, false)
-
             if comment == '(не указан)' then
                 comment = c(color.lightGrey) .. comment
             end

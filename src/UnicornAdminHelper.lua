@@ -160,7 +160,7 @@ end
 -- Сохранение настроек скрипта
 function saveSettings()
     local cl = {}
-    for k, c in pairs(s.commands) do
+    for k, c in pairs(settings.commands) do
         cl[k] = c.raw
     end
     settings.commands = cl

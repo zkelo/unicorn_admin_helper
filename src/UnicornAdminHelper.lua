@@ -159,15 +159,17 @@ end
 
 -- Сохранение настроек скрипта
 function saveSettings()
-    local s, cl = deepcopy(settings), {}
+    local cl = {}
     for k, c in pairs(s.commands) do
         cl[k] = c.raw
     end
-    s.commands = cl
+    settings.commands = cl
 
     local configFile = io.open(configFilepath, 'w')
-    configFile:write(encodeJson(s))
+    configFile:write(encodeJson(settings))
     configFile:close()
+
+    settings.commands = parseCommands(settings.commands)
 end
 
 -- Добавление игрока в список нарушителей
@@ -207,25 +209,6 @@ function getPlayerIdByNickname(nickname)
     end
 
     return nil
-end
-
--- Копирует таблицы (и не только) любых уровней
--- Взято отсюда: http://lua-users.org/wiki/CopyTable
-function deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
-        end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-
-    return copy
 end
 
 -- Возвращает никнейм игрока из списка нарушителей

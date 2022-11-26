@@ -141,6 +141,7 @@ function loadSettings()
     end
 
     settings = decodeJson(configFile:read('*a'))
+    configFile:close()
 
     --[[ Проверка корректности значений настроек ]]
     -- Список нарушителей должен быть таблицей
@@ -155,9 +156,10 @@ function loadSettings()
     end
 
     -- Обработка команд
+    if settings.commands == nil then
+        settings.commands = defaults.commands
+    end
     settings.commands = parseCommands(settings.commands)
-
-    configFile:close()
 end
 
 -- Сохранение настроек скрипта

@@ -19,9 +19,9 @@ if (Test-Path -Path $CompiledScriptPath -PathType leaf)
     Remove-Item -Force $CompiledScriptPath
 }
 
-cd .\luajit
+Set-Location .\luajit
 & '.\luajit.exe' '-b' "..\$DistFolder\$ScriptFilename" ".$CompiledScriptPath"
-cd ..
+Set-Location ..
 
 if (-not (Test-Path -Path $CompiledScriptPath -PathType leaf))
 {

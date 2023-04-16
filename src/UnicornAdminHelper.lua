@@ -170,9 +170,9 @@ function saveSettings()
     end
     settings.commands = cl
 
-    local configFile = io.open(configFilepath, 'w')
-    configFile:write(encodeJson(settings))
-    configFile:close()
+    local config = io.open(configFilepath, 'w')
+    config:write(encodeJson(settings))
+    config:close()
 
     settings.commands = parseCommands(settings.commands)
 end

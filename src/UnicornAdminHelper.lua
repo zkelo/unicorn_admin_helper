@@ -4,6 +4,9 @@ local samp = require 'samp.events'
 local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
 local io = require 'io'
+local ffi = require 'ffi'
+local moonloader = require 'lib.moonloader'
+local mem = require 'memory'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -13,6 +16,17 @@ script_version('2.0.0')
 script_version_number(5)
 script_moonloader(26)
 script_dependencies('encoding', 'samp')
+
+--[[ Константы ]]
+-- На самом деле, в Lua не существует констант,
+-- поэтому здесь есть просто условность о том,
+-- что если название переменной написано в верхнем регистре,
+-- то переменная является константой и изменять её нельзя
+
+-- Режимы Wallhack-а
+local WALLHACK_MODE_ALL = 'all' -- Ники и скелет
+local WALLHACK_MODE_BONES = 'bones' -- Только скелет
+local WALLHACK_MODE_NAMES = 'names' -- Только ники
 
 --[[ Переменные и значения по умолчанию ]]
 -- Название конфигурационного файла
@@ -99,7 +113,10 @@ local defaults = {
         '/uj {d:ID игрока} - выпустить из тюрьмы>unjail:$1',
         '/ub {s:Никнейм игрока} - разбанить>unban:$1',
         '/ubl {s:Никнейм игрока} - разблокировать аккаунт>unblock:$1'
-    }
+    },
+    -- Wallhack
+    enabled = false,
+    mode = WALLHACK_MODE_BONES
 }
 
 -- Настройки скрипта
@@ -127,8 +144,13 @@ local keyCapture = {
 -- если пользователь часто открывает список
 local suspectsListShownCounter = 0
 
+-- Индекс выбранного пункта в диалоге со списком нарушителей
 local suspectsListItemIndex = nil
+
+-- Флаг необходимости возврата в диалог настроек при закрытии открытого диалога
 local backwardToSettingsFromCurrentDialog = false
+
+-- Список нарушителей
 local serverSuspects = {}
 
 --[[ Вспомогательные функции ]]
@@ -349,6 +371,14 @@ function handleCustomCommand(text, args)
 
     --[[ Отправка ]]
     sampSendChat(result)
+end
+
+-- Возвращает координаты костей скелета персонажа
+local getBonePosition = ffi.cast('int (__thiscall*)(void*, float*, int, bool)', 0x5e4280)
+
+-- Переключает режим Wallhack-а (циклично)
+function toggleWallhackMode()
+    --
 end
 
 --[[ Главные функции ]]

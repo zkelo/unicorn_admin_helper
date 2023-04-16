@@ -4,6 +4,7 @@ local samp = require 'samp.events'
 local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
 local io = require 'io'
+local inspect = require '../lib/inspect'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -156,6 +157,8 @@ function loadSettings()
     end
 
     -- Обработка команд
+    print('*** *** *** cmds 1 *** *** ***')
+    print(inspect(settings.commands))
     if settings.commands == nil then
         settings.commands = defaults.commands
     end

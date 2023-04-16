@@ -156,9 +156,6 @@ function loadSettings()
     end
 
     -- Обработка команд
-    if #settings.commands == 0 then
-        settings.commands = defaults.commands
-    end
     settings.commands = parseCommands(settings.commands)
 end
 

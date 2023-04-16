@@ -134,14 +134,15 @@ local serverSuspects = {}
 --[[ Вспомогательные функции ]]
 -- Загрузка настроек скрипта
 function loadSettings()
-    local configFile = io.open(configFilepath)
-    if configFile == nil then
+    local config = io.open(configFilepath, 'r')
+    if config == nil then
         settings = defaults
+        settings.commands = parseCommands(settings.commands)
         return
     end
 
-    settings = decodeJson(configFile:read('*a'))
-    configFile:close()
+    settings = decodeJson(config:read('*a'))
+    config:close()
 
     --[[ Проверка корректности значений настроек ]]
     -- Список нарушителей должен быть таблицей

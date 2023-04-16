@@ -4,7 +4,6 @@ local samp = require 'samp.events'
 local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
 local io = require 'io'
-local inspect = require '../lib/inspect'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -157,9 +156,7 @@ function loadSettings()
     end
 
     -- Обработка команд
-    print('*** *** *** cmds 1 *** *** ***')
-    print(inspect(settings.commands))
-    if settings.commands == nil then
+    if #settings.commands == 0 then
         settings.commands = defaults.commands
     end
     settings.commands = parseCommands(settings.commands)
@@ -381,7 +378,6 @@ function main()
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
         local commands = ''
-
         for text, cmd in pairs(settings.commands) do
             local ps = ''
 

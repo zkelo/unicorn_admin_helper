@@ -249,7 +249,7 @@ end
 function parseCommands(commands)
     local list = {}
 
-    for _, c in ipairs(commands) do
+    for _, c in pairs(commands) do
         local l, r = c:match('([^%>]+)>(.+)')
 
         local m = ''

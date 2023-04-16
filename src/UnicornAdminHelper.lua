@@ -157,7 +157,10 @@ function loadSettings()
     end
 
     -- Обработка команд
-    settings.commands = parseCommands(settings.commands)
+    if not pcall(function() settings.commands = parseCommands(settings.commands) end) then
+        settings.commands = parseCommands(defaults.commands)
+        print('Не удалось разобрать список команд. Восстановлены стандартные команды')
+    end
 end
 
 -- Сохранение настроек скрипта
@@ -172,7 +175,10 @@ function saveSettings()
     config:write(encodeJson(settings))
     config:close()
 
-    settings.commands = parseCommands(settings.commands)
+    if not pcall(function () settings.commands = parseCommands(settings.commands) end) then
+        settings.commands = parseCommands(defaults.commands)
+        print('Не удалось разобрать список команд. Восстановлены стандартные команды')
+    end
 end
 
 -- Добавление игрока в список нарушителей

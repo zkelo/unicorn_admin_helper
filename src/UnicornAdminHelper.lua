@@ -762,24 +762,20 @@ function wallhackWorker()
                     if result and doesCharExist(ped) and isCharOnScreen(ped) then
                         local pos1x, pos1y, pos1z
 
-                        for idx, bodypart in ipairs(wallhackBodyParts) do
-                            if idx == #wallhackBodyParts then
-                                break
-                            end
-
-                            pos1x, pos1y, pos1z = getBodyPartCoordinates(bodypart, ped)
-                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx + 1], ped)
+                        for idx = 1, #wallhackBodyParts do
+                            pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
+                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
 
                             local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
                             local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
 
-                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y)
+                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
 
                             if idx == 4 or idx == 5 then
                                 pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
                                 screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
 
-                                renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y)
+                                renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
                             end
                         end
                     end

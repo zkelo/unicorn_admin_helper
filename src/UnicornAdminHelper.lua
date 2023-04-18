@@ -29,8 +29,11 @@ local WALLHACK_MODE_BONES = 'bones' -- Только скелет
 local WALLHACK_MODE_NAMES = 'names' -- Только ники
 
 --[[ Переменные и значения по умолчанию ]]
+-- Путь к папке config
+local configDir = getWorkingDirectory() .. '/config'
+
 -- Название конфигурационного файла
-local configFilepath = getWorkingDirectory() .. '/config/UnicornAdminHelper.json'
+local configFilepath = configDir .. '/UnicornAdminHelper.json'
 
 -- Отладка
 local debug = false
@@ -436,6 +439,11 @@ function main()
     end
 
     --[[ Инициализация скрипта ]]
+    -- Создание папки config, если она не существует
+    if not doesDirectoryExist(configDir) then
+        createDirectory(configDir)
+    end
+
     -- Загрузка настроек из конфига
     loadSettings()
 

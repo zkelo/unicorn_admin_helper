@@ -115,8 +115,10 @@ local defaults = {
         '/ubl {s:Никнейм игрока} - разблокировать аккаунт>unblock:$1'
     },
     -- Wallhack
-    enabled = false,
-    mode = WALLHACK_MODE_BONES
+    wallhack = {
+        enabled = false,
+        mode = WALLHACK_MODE_BONES
+    }
 }
 
 -- Настройки скрипта
@@ -152,6 +154,18 @@ local backwardToSettingsFromCurrentDialog = false
 
 -- Список нарушителей
 local serverSuspects = {}
+
+-- Поток для Wallhack-а
+local wallhackThread
+
+-- ID частей тела персонажа,
+-- на которых будут отрисовываться
+-- линии при включённом Wallhack-е
+local wallhackBodyParts = {
+    3, 4, 5, 51, 52,
+    41, 42, 31, 32, 33,
+    21, 22, 23, 2
+}
 
 --[[ Вспомогательные функции ]]
 -- Загрузка настроек скрипта
@@ -381,6 +395,33 @@ function toggleWallhackMode()
     --
 end
 
+-- join_argb
+function join_argb(a, r, g, b)
+    local argb = b -- b
+    argb = bit.bor(argb, bit.lshift(g, 8)) -- g
+    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
+    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
+    return argb
+end
+
+-- explode_argb
+function explode_argb(argb)
+    local a = bit.band(bit.rshift(argb, 24), 0xFF)
+    local r = bit.band(bit.rshift(argb, 16), 0xFF)
+    local g = bit.band(bit.rshift(argb, 8), 0xFF)
+    local b = bit.band(argb, 0xFF)
+    return a, r, g, b
+end
+
+-- Возвращает координаты части тела персонажа
+function getBodyPartCoordinates(id, handle)
+    local ptr = getCharPointer(handle)
+    local vec = ffi.new('float[3]')
+
+    getBonePosition(ffi.cast('void*', ptr), vec, id, true)
+    return vec[0], vec[1], vec[2]
+end
+
 --[[ Главные функции ]]
 function main()
     -- Если SAMP или SAMPFUNCS не загружен,
@@ -522,7 +563,7 @@ function main()
         end
     end)
 
-    -- Регистрация собственных команд
+    -- Регистрация пользовательских команд
     for text, _ in pairs(settings.commands) do
         sampRegisterChatCommand(text, function (args)
             if not pcall(handleCustomCommand, text, args) then
@@ -567,8 +608,18 @@ function main()
             for name, comment in pairs(settings.suspects) do
                 print(string.format('%q: %q', name, comment))
             end
+        elseif arg == 'wallhack' then
+            print('Статус WH: ', settings.wallhack.enabled and 'Включён' or 'Выключен')
         end
     end)
+
+    -- Поток для Wallhack-а
+    wallhackThread = lua_thread.create_suspended(wallhackWorker)
+    if settings.wallhack.enabled then
+        -- Если Wallhack включён в настройках,
+        -- то необходимо запустить поток
+        wallhackThread:run()
+    end
 
     -- Главный цикл
     while true do
@@ -577,9 +628,18 @@ function main()
         --[[ Обработка нажатий клавиш ]]
         if not sampIsChatInputActive()
             and not sampIsDialogActive()
-            and isKeyJustPressed(settings.hotkeys.hotkeySuspectsList)
         then
-            sampProcessChatInput('/suspects')
+            if isKeyJustPressed(settings.hotkeys.hotkeySuspectsList) then
+                sampProcessChatInput('/suspects')
+            elseif isKeyJustPressed(settings.hotkeys.hotkeyWallhack) then
+                settings.wallhack.enabled = not settings.wallhack.enabled
+
+                if settings.wallhack.enabled then
+                    wallhackThread:run()
+                else
+                    wallhackThread:terminate()
+                end
+            end
         end
 
         --[[ Обработка диалогов ]]
@@ -667,6 +727,60 @@ function main()
                         sampSetChatInputEnabled(true)
                         sampSetChatInputText(string.format('/su %s %s', nickname, settings.suspects[nickname]))
                         suspectsListItemIndex = sampGetCurrentDialogListItem()
+                    end
+                end
+            end
+        end
+    end
+
+    wallhackThread:terminate()
+end
+
+--[[ Функция для отдельного потока для Wallhack ]]
+function wallhackWorker()
+    while not sampIsLocalPlayerSpawned() do wait(1000) end
+
+    print('wh 1')
+    while true do
+        print('wh 2')
+        if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) then
+            print('wh 3')
+            for id = 0, sampGetMaxPlayerId() do
+                print('wh 4')
+                if sampIsPlayerConnected(id) then
+                    print('wh 5')
+                    local result, ped = sampGetCharHandleBySampPlayerId(id)
+                    local color = sampGetPlayerColor(id)
+                    local a, r, g, b = explode_argb(color)
+                    color = join_argb(255, r, g, b)
+
+                    print('wh 6')
+                    if result and doesCharExist(ped) and isCharOnScreen(ped) then
+                        print('wh 7')
+                        local pos1x, pos1y, pos1z
+
+                        for idx, bodypart in ipairs(wallhackBodyParts) do
+                            print('wh 8')
+                            if idx == #wallhackBodyParts then
+                                break
+                            end
+
+                            pos1x, pos1y, pos1z = getBodyPartCoordinates(bodypart, ped)
+                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx + 1], ped)
+
+                            local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
+                            local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y)
+
+                            if idx == 4 or idx == 5 then
+                                print('wh 9')
+                                pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
+                                screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                                renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y)
+                            end
+                        end
                     end
                 end
             end

@@ -748,27 +748,21 @@ end
 function wallhackWorker()
     while not sampIsLocalPlayerSpawned() do wait(1000) end
 
-    print('wh 1')
     while true do
-        print('wh 2')
+        wait(0)
+
         if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) then
-            print('wh 3')
             for id = 0, sampGetMaxPlayerId() do
-                print('wh 4')
                 if sampIsPlayerConnected(id) then
-                    print('wh 5')
                     local result, ped = sampGetCharHandleBySampPlayerId(id)
                     local color = sampGetPlayerColor(id)
                     local a, r, g, b = explode_argb(color)
                     color = join_argb(255, r, g, b)
 
-                    print('wh 6')
                     if result and doesCharExist(ped) and isCharOnScreen(ped) then
-                        print('wh 7')
                         local pos1x, pos1y, pos1z
 
                         for idx, bodypart in ipairs(wallhackBodyParts) do
-                            print('wh 8')
                             if idx == #wallhackBodyParts then
                                 break
                             end
@@ -782,7 +776,6 @@ function wallhackWorker()
                             renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y)
 
                             if idx == 4 or idx == 5 then
-                                print('wh 9')
                                 pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
                                 screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
 

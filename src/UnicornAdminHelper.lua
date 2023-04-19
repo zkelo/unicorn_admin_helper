@@ -395,7 +395,24 @@ local getBonePosition = ffi.cast('int (__thiscall*)(void*, float*, int, bool)', 
 
 -- Переключает режим Wallhack-а (циклично)
 function toggleWallhackMode()
-    --
+    if settings.wallhack.mode == WALLHACK_MODE_ALL then
+        settings.wallhack.mode = WALLHACK_MODE_BONES
+    elseif settings.wallhack.mode == WALLHACK_MODE_BONES then
+        settings.wallhack.mode = WALLHACK_MODE_NAMES
+    elseif settings.wallhack.mode == WALLHACK_MODE_NAMES then
+        settings.wallhack.mode = WALLHACK_MODE_ALL
+    end
+end
+
+-- Возвращает название текущего режима Wallhack-а
+function wallhackModeName()
+    if settings.wallhack.mode == WALLHACK_MODE_NAMES then
+        return 'Только ники'
+    elseif settings.wallhack.mode == WALLHACK_MODE_BONES then
+        return 'Только скелет'
+    end
+
+    return 'Ники и скелет'
 end
 
 -- join_argb
@@ -482,17 +499,17 @@ function main()
 
         local _, commandsCount = commands:gsub('\n', '')
         local content = string.format(
-            -- 0                      1                        2
-            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
+            -- 0                      1                        2          3
+            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\nРежим: %s\n \n',
             c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack)
         ) .. string.format(
-            -- 3                       4                              5                             6                       7
+            -- 4                       5                              6                             7                       8
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList),
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList), --[[ whMode() ]]
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(
-            -- 8
+            -- 9
             '%s--- Команды %s(%d)\n%s',
             c(color.yellow), c(color.green), commandsCount, commands
         )
@@ -669,23 +686,23 @@ function main()
         result, button, listitem = sampHasDialogRespond(dialog.settings.id)
         if result and button == 1 then
             if listitem == 1
-                or listitem == 4
                 or listitem == 5
                 or listitem == 6
+                or listitem == 7
             then
                 if listitem == 1 then
                     keyCapture.fnc = 'Активация Wallhack в слежке'
                     keyCapture.id = settings.hotkeys.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
-                elseif listitem == 4 then
+                elseif listitem == 5 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
-                elseif listitem == 5 then
+                elseif listitem == 6 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
-                elseif listitem == 6 then
+                elseif listitem == 7 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
@@ -693,10 +710,13 @@ function main()
 
                 backwardToSettingsFromCurrentDialog = true
                 showHotkeyCaptureDialog()
+            elseif listitem == 2 then
+                toggleWallhackMode()
+                sampProcessChatInput('/uah')
             elseif listitem == 0
-                or listitem == 2
                 or listitem == 3
-                or listitem >= 7
+                or listitem == 4
+                or listitem >= 8
             then
                 sampProcessChatInput('/uah')
             end

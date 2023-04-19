@@ -500,12 +500,12 @@ function main()
         local _, commandsCount = commands:gsub('\n', '')
         local content = string.format(
             -- 0                      1                        2          3
-            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\nРежим: %s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack)
+            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\nРежим: %s%s\n \n',
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack), c(color.grey), wallhackModeName()
         ) .. string.format(
             -- 4                       5                              6                             7                       8
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList), wallhackModeName(),
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(
@@ -771,31 +771,33 @@ function threadWallhack()
     while true do
         wait(0)
 
-        if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) then
-            for id = 0, sampGetMaxPlayerId() do
-                if sampIsPlayerConnected(id) then
-                    local result, ped = sampGetCharHandleBySampPlayerId(id)
-                    local color = sampGetPlayerColor(id)
-                    local a, r, g, b = explode_argb(color)
-                    color = join_argb(255, r, g, b)
+        if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) and not sampIsDialogActive() then
+            if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_BONES then
+                for id = 0, sampGetMaxPlayerId() do
+                    if sampIsPlayerConnected(id) then
+                        local result, ped = sampGetCharHandleBySampPlayerId(id)
+                        local color = sampGetPlayerColor(id)
+                        local a, r, g, b = explode_argb(color)
+                        color = join_argb(255, r, g, b)
 
-                    if result and doesCharExist(ped) and isCharOnScreen(ped) then
-                        local pos1x, pos1y, pos1z
+                        if result and doesCharExist(ped) and isCharOnScreen(ped) then
+                            local pos1x, pos1y, pos1z
 
-                        for idx = 1, #wallhackBodyParts do
-                            pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
-                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
+                            for idx = 1, #wallhackBodyParts do
+                                pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
+                                local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
 
-                            local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
-                            local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
-
-                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
-
-                            if idx == 4 or idx == 5 then
-                                pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
-                                screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+                                local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
+                                local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
 
                                 renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
+
+                                if idx == 4 or idx == 5 then
+                                    pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
+                                    screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                                    renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
+                                end
                             end
                         end
                     end

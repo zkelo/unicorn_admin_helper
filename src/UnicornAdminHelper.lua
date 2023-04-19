@@ -170,15 +170,21 @@ local wallhackBodyParts = {
     21, 22, 23, 2
 }
 
--- Настройки отображения ников для Wallhack-а
-local wallhackNametagsData = {
+-- Указатели на некоторые значения в памяти
+local pointers = {
+    nametags = {
+        dist = 0,
+        walls = 0,
+        show = 0
+    }
+}
+
+-- Настройки отображения ников по умолчанию
+local nametagsDefaults = {
     dist = 0.0,
     walls = 0,
     show = 0
 }
-
--- Флаг отображения ников при включённом Wallhack-е
-local wallhackNametagsFlag = false
 
 --[[ Вспомогательные функции ]]
 -- Загрузка настроек скрипта
@@ -437,26 +443,15 @@ end
 
 -- Включает или выключает отображение ников при включённом Wallhack-е
 function wallhackToggleNametags(toggle)
-    local settingsPtr = sampGetServerSettingsPtr()
-    local ntDistPtr = settingsPtr + 39
-    local ntWallsPtr = settingsPtr + 47
-    local ntShowPtr = settingsPtr + 56
-
     if toggle then
-        if wallhackNametagsFlag then
-            return
-        end
-
         mem.setfloat(ntDistPtr, 1488.0)
         mem.setint8(ntWallsPtr, 0)
         mem.setint8(ntShowPtr, 1)
     else
-        mem.setfloat(ntDistPtr, wallhackNametagsData.dist)
-        mem.setint8(ntWallsPtr, wallhackNametagsData.walls)
-        mem.setint8(ntShowPtr, wallhackNametagsData.show)
+        mem.setfloat(ntDistPtr, nametagsDefaults.dist)
+        mem.setint8(ntWallsPtr, nametagsDefaults.walls)
+        mem.setint8(ntShowPtr, nametagsDefaults.show)
     end
-
-    wallhackNametagsFlag = toggle
 end
 
 -- join_argb
@@ -498,6 +493,12 @@ function main()
     while not isSampAvailable() do
         wait(100)
     end
+
+    -- Получение нужных адресов памяти
+    local settingsPtr = sampGetServerSettingsPtr()
+    pointers.nametags.dist = settingsPtr + 39
+    pointers.nametags.walls = settingsPtr + 47
+    pointers.nametags.show = settingsPtr + 56
 
     --[[ Инициализация скрипта ]]
     -- Создание папки config, если она не существует
@@ -815,6 +816,10 @@ end
 --[[ Функция для отдельного потока для Wallhack ]]
 function threadWallhack()
     while not sampIsLocalPlayerSpawned() do wait(1000) end
+
+    nametagsDefaults.dist = mem.getfloat(pointers.nametags.dist)
+    nametagsDefaults.walls = mem.getint8(pointers.nametags.walls)
+    nametagsDefaults.show = mem.getint8(pointers.nametags.show)
 
     if settings.wallhack.enabled and (settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES) then
         wallhackToggleNametags(true)

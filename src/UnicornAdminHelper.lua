@@ -505,7 +505,7 @@ function main()
         ) .. string.format(
             -- 4                       5                              6                             7                       8
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList), --[[ whMode() ]]
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList), wallhackModeName(),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(

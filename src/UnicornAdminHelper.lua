@@ -170,6 +170,16 @@ local wallhackBodyParts = {
     21, 22, 23, 2
 }
 
+-- Настройки отображения ников для Wallhack-а
+local wallhackNametagsData = {
+    dist = 0.0,
+    walls = 0,
+    show = 0
+}
+
+-- Флаг отображения ников при включённом Wallhack-е
+local wallhackNametagsFlag = false
+
 --[[ Вспомогательные функции ]]
 -- Загрузка настроек скрипта
 function loadSettings()
@@ -402,6 +412,16 @@ function toggleWallhackMode()
     elseif settings.wallhack.mode == WALLHACK_MODE_NAMES then
         settings.wallhack.mode = WALLHACK_MODE_ALL
     end
+
+    if not settings.wallhack.enabled then
+        return
+    end
+
+    if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES then
+        wallhackToggleNametags(true)
+    else
+        wallhackToggleNametags(false)
+    end
 end
 
 -- Возвращает название текущего режима Wallhack-а
@@ -413,6 +433,30 @@ function wallhackModeName()
     end
 
     return 'Ники и скелет'
+end
+
+-- Включает или выключает отображение ников при включённом Wallhack-е
+function wallhackToggleNametags(toggle)
+    local settingsPtr = sampGetServerSettingsPtr()
+    local ntDistPtr = settingsPtr + 39
+    local ntWallsPtr = settingsPtr + 47
+    local ntShowPtr = settingsPtr + 56
+
+    if toggle then
+        if wallhackNametagsFlag then
+            return
+        end
+
+        mem.setfloat(ntDistPtr, 1488.0)
+        mem.setint8(ntWallsPtr, 0)
+        mem.setint8(ntShowPtr, 1)
+    else
+        mem.setfloat(ntDistPtr, wallhackNametagsData.dist)
+        mem.setint8(ntWallsPtr, wallhackNametagsData.walls)
+        mem.setint8(ntShowPtr, wallhackNametagsData.show)
+    end
+
+    wallhackNametagsFlag = toggle
 end
 
 -- join_argb
@@ -662,6 +706,10 @@ function main()
                 if settings.wallhack.enabled then
                     wallhackThread:run()
                 else
+                    if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES then
+                        wallhackToggleNametags(false)
+                    end
+
                     wallhackThread:terminate()
                 end
             end
@@ -767,6 +815,10 @@ end
 --[[ Функция для отдельного потока для Wallhack ]]
 function threadWallhack()
     while not sampIsLocalPlayerSpawned() do wait(1000) end
+
+    if settings.wallhack.enabled and (settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES) then
+        wallhackToggleNametags(true)
+    end
 
     while true do
         wait(0)

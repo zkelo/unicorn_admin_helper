@@ -622,7 +622,7 @@ function main()
     end)
 
     -- Поток для Wallhack-а
-    wallhackThread = lua_thread.create_suspended(wallhackWorker)
+    wallhackThread = lua_thread.create_suspended(threadWallhack)
     if settings.wallhack.enabled then
         -- Если Wallhack включён в настройках,
         -- то необходимо запустить поток
@@ -745,7 +745,7 @@ function main()
 end
 
 --[[ Функция для отдельного потока для Wallhack ]]
-function wallhackWorker()
+function threadWallhack()
     while not sampIsLocalPlayerSpawned() do wait(1000) end
 
     while true do

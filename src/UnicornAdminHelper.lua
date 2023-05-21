@@ -573,7 +573,7 @@ function main()
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version | suspects | debug | settings]')
+            print('uah [[num_]version | suspects | debug | settings | wallhack]')
         elseif arg == 'debug' then
             debug = not debug
 
@@ -605,6 +605,7 @@ function main()
             end
         elseif arg == 'wallhack' then
             print('Статус WH: ', settings.wallhack.enabled and 'Включён' or 'Выключен')
+            print('Статус потока WH: ', wallhackThread:status())
         end
     end)
 
@@ -797,4 +798,9 @@ function samp.onServerMessage(messageColor, text)
         local suspectId = text:sub(openBracket + 1, closeBracket - 1)
         sampAddChatMessage(string.format('Обнаружен читер - ID: %d', suspectId), color.system)
     end
+end
+
+--[[ Обработка входа и выхода из слежки ]]
+function samp.onTogglePlayerSpectating(state)
+    if settings.wallhack.enabled and state then wallhackThread:run() else wallhackThread:terminate() end
 end

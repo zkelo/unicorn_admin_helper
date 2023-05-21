@@ -23,11 +23,6 @@ script_dependencies('encoding', 'samp')
 -- что если название переменной написано в верхнем регистре,
 -- то переменная является константой и изменять её нельзя
 
--- Режимы Wallhack-а
-local WALLHACK_MODE_ALL = 'all' -- Ники и скелет
-local WALLHACK_MODE_BONES = 'bones' -- Только скелет
-local WALLHACK_MODE_NAMES = 'names' -- Только ники
-
 --[[ Переменные и значения по умолчанию ]]
 -- Путь к папке config
 local configDir = getWorkingDirectory() .. '/config'
@@ -119,8 +114,7 @@ local defaults = {
     },
     -- Wallhack
     wallhack = {
-        enabled = false,
-        mode = WALLHACK_MODE_BONES
+        enabled = false
     }
 }
 
@@ -168,22 +162,6 @@ local wallhackBodyParts = {
     3, 4, 5, 51, 52,
     41, 42, 31, 32, 33,
     21, 22, 23, 2
-}
-
--- Указатели на некоторые значения в памяти
-local pointers = {
-    nametags = {
-        dist = 0,
-        walls = 0,
-        show = 0
-    }
-}
-
--- Настройки отображения ников по умолчанию
-local nametagsDefaults = {
-    dist = 0.0,
-    walls = 0,
-    show = 0
 }
 
 --[[ Вспомогательные функции ]]
@@ -409,51 +387,6 @@ end
 -- Возвращает координаты костей скелета персонажа
 local getBonePosition = ffi.cast('int (__thiscall*)(void*, float*, int, bool)', 0x5e4280)
 
--- Переключает режим Wallhack-а (циклично)
-function toggleWallhackMode()
-    if settings.wallhack.mode == WALLHACK_MODE_ALL then
-        settings.wallhack.mode = WALLHACK_MODE_BONES
-    elseif settings.wallhack.mode == WALLHACK_MODE_BONES then
-        settings.wallhack.mode = WALLHACK_MODE_NAMES
-    elseif settings.wallhack.mode == WALLHACK_MODE_NAMES then
-        settings.wallhack.mode = WALLHACK_MODE_ALL
-    end
-
-    if not settings.wallhack.enabled then
-        return
-    end
-
-    if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES then
-        wallhackToggleNametags(true)
-    else
-        wallhackToggleNametags(false)
-    end
-end
-
--- Возвращает название текущего режима Wallhack-а
-function wallhackModeName()
-    if settings.wallhack.mode == WALLHACK_MODE_NAMES then
-        return 'Только ники'
-    elseif settings.wallhack.mode == WALLHACK_MODE_BONES then
-        return 'Только скелет'
-    end
-
-    return 'Ники и скелет'
-end
-
--- Включает или выключает отображение ников при включённом Wallhack-е
-function wallhackToggleNametags(toggle)
-    if toggle then
-        mem.setfloat(ntDistPtr, 1488.0)
-        mem.setint8(ntWallsPtr, 0)
-        mem.setint8(ntShowPtr, 1)
-    else
-        mem.setfloat(ntDistPtr, nametagsDefaults.dist)
-        mem.setint8(ntWallsPtr, nametagsDefaults.walls)
-        mem.setint8(ntShowPtr, nametagsDefaults.show)
-    end
-end
-
 -- join_argb
 function join_argb(a, r, g, b)
     local argb = b -- b
@@ -493,12 +426,6 @@ function main()
     while not isSampAvailable() do
         wait(100)
     end
-
-    -- Получение нужных адресов памяти
-    local settingsPtr = sampGetServerSettingsPtr()
-    pointers.nametags.dist = settingsPtr + 39
-    pointers.nametags.walls = settingsPtr + 47
-    pointers.nametags.show = settingsPtr + 56
 
     --[[ Инициализация скрипта ]]
     -- Создание папки config, если она не существует
@@ -544,17 +471,17 @@ function main()
 
         local _, commandsCount = commands:gsub('\n', '')
         local content = string.format(
-            -- 0                      1                        2          3
-            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\nРежим: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack), c(color.grey), wallhackModeName()
+            -- 0                      1                        2
+            '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack)
         ) .. string.format(
-            -- 4                       5                              6                             7                       8
+            -- 3                       4                              5                             6                       7
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
             c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
             c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(
-            -- 9
+            -- 8
             '%s--- Команды %s(%d)\n%s',
             c(color.yellow), c(color.green), commandsCount, commands
         )
@@ -707,10 +634,6 @@ function main()
                 if settings.wallhack.enabled then
                     wallhackThread:run()
                 else
-                    if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES then
-                        wallhackToggleNametags(false)
-                    end
-
                     wallhackThread:terminate()
                 end
             end
@@ -735,23 +658,23 @@ function main()
         result, button, listitem = sampHasDialogRespond(dialog.settings.id)
         if result and button == 1 then
             if listitem == 1
+                or listitem == 4
                 or listitem == 5
                 or listitem == 6
-                or listitem == 7
             then
                 if listitem == 1 then
                     keyCapture.fnc = 'Активация Wallhack в слежке'
                     keyCapture.id = settings.hotkeys.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
-                elseif listitem == 5 then
+                elseif listitem == 4 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
-                elseif listitem == 6 then
+                elseif listitem == 5 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
-                elseif listitem == 7 then
+                elseif listitem == 6 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
                     keyCapture.id = settings.hotkeys.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
@@ -759,13 +682,10 @@ function main()
 
                 backwardToSettingsFromCurrentDialog = true
                 showHotkeyCaptureDialog()
-            elseif listitem == 2 then
-                toggleWallhackMode()
-                sampProcessChatInput('/uah')
             elseif listitem == 0
+                or listitem == 2
                 or listitem == 3
-                or listitem == 4
-                or listitem >= 8
+                or listitem >= 7
             then
                 sampProcessChatInput('/uah')
             end
@@ -817,44 +737,34 @@ end
 function threadWallhack()
     while not sampIsLocalPlayerSpawned() do wait(1000) end
 
-    nametagsDefaults.dist = mem.getfloat(pointers.nametags.dist)
-    nametagsDefaults.walls = mem.getint8(pointers.nametags.walls)
-    nametagsDefaults.show = mem.getint8(pointers.nametags.show)
-
-    if settings.wallhack.enabled and (settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_NAMES) then
-        wallhackToggleNametags(true)
-    end
-
     while true do
         wait(0)
 
         if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) and not sampIsDialogActive() then
-            if settings.wallhack.mode == WALLHACK_MODE_ALL or settings.wallhack.mode == WALLHACK_MODE_BONES then
-                for id = 0, sampGetMaxPlayerId() do
-                    if sampIsPlayerConnected(id) then
-                        local result, ped = sampGetCharHandleBySampPlayerId(id)
-                        local color = sampGetPlayerColor(id)
-                        local a, r, g, b = explode_argb(color)
-                        color = join_argb(255, r, g, b)
+            for id = 0, sampGetMaxPlayerId() do
+                if sampIsPlayerConnected(id) then
+                    local result, ped = sampGetCharHandleBySampPlayerId(id)
+                    local color = sampGetPlayerColor(id)
+                    local a, r, g, b = explode_argb(color)
+                    color = join_argb(255, r, g, b)
 
-                        if result and doesCharExist(ped) and isCharOnScreen(ped) then
-                            local pos1x, pos1y, pos1z
+                    if result and doesCharExist(ped) and isCharOnScreen(ped) then
+                        local pos1x, pos1y, pos1z
 
-                            for idx = 1, #wallhackBodyParts do
-                                pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
-                                local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
+                        for idx = 1, #wallhackBodyParts do
+                            pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
+                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
 
-                                local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
-                                local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+                            local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
+                            local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
+
+                            if idx == 4 or idx == 5 then
+                                pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
+                                screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
 
                                 renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
-
-                                if idx == 4 or idx == 5 then
-                                    pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
-                                    screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
-
-                                    renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
-                                end
                             end
                         end
                     end

@@ -5,7 +5,6 @@ local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
 local io = require 'io'
 local ffi = require 'ffi'
-local moonloader = require 'lib.moonloader'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')

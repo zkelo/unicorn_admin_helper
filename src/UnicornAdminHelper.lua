@@ -191,9 +191,9 @@ function loadSettings()
     end
 
     -- Обработка команд
-    if not pcall(function() settings.commands = parseCommands(settings.commands) end) then
+    if not pcall(function () settings.commands = parseCommands(settings.commands) end) then
         settings.commands = parseCommands(defaults.commands)
-        print('Не удалось разобрать список команд. Восстановлены стандартные команды')
+        sampAddChatMessage(string.format('Ошибка: %sНе удалось разобрать список команд. Восстановлены стандартные команды', c(color.white)), color.red)
     end
 end
 
@@ -211,7 +211,7 @@ function saveSettings()
 
     if not pcall(function () settings.commands = parseCommands(settings.commands) end) then
         settings.commands = parseCommands(defaults.commands)
-        print('Не удалось разобрать список команд. Восстановлены стандартные команды')
+        sampAddChatMessage(string.format('Ошибка: %sНе удалось разобрать список команд. Восстановлены стандартные команды', c(color.white)), color.red)
     end
 end
 

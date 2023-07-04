@@ -162,6 +162,9 @@ local wallhackBodyParts = {
     21, 22, 23, 2
 }
 
+-- Состояние, находится ли игрок в слежке (для WH)
+local isPlayerSpectating = false
+
 --[[ Вспомогательные функции ]]
 -- Загрузка настроек скрипта
 function loadSettings()
@@ -317,7 +320,7 @@ function parseCommands(commands)
     return list
 end
 
--- Обрабатывает собственные команды
+-- Обрабатывает пользовательские команды
 function handleCustomCommand(text, args)
     --[[ Проверка на существование команды ]]
     local cmd = settings.commands[text]
@@ -611,7 +614,7 @@ function main()
 
     -- Поток для Wallhack-а
     wallhackThread = lua_thread.create_suspended(threadWallhack)
-    if settings.wallhack.enabled then
+    if settings.wallhack.enabled and isPlayerSpectating then
         -- Если Wallhack включён в настройках,
         -- то необходимо запустить поток
         wallhackThread:run()
@@ -630,7 +633,7 @@ function main()
             elseif isKeyJustPressed(settings.hotkeys.hotkeyWallhack) then
                 settings.wallhack.enabled = not settings.wallhack.enabled
 
-                if settings.wallhack.enabled then
+                if settings.wallhack.enabled and isPlayerSpectating then
                     wallhackThread:run()
                 else
                     wallhackThread:terminate()
@@ -739,7 +742,7 @@ function threadWallhack()
     while true do
         wait(0)
 
-        if settings.wallhack.enabled and not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) and not sampIsDialogActive() then
+        if not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) and not sampIsDialogActive() then
             for id = 0, sampGetMaxPlayerId() do
                 if sampIsPlayerConnected(id) then
                     local result, ped = sampGetCharHandleBySampPlayerId(id)
@@ -802,5 +805,11 @@ end
 
 --[[ Обработка входа и выхода из слежки ]]
 function samp.onTogglePlayerSpectating(state)
-    if settings.wallhack.enabled and state then wallhackThread:run() else wallhackThread:terminate() end
+    isPlayerSpectating = state
+
+    if settings.wallhack.enabled and isPlayerSpectating then
+        wallhackThread:run()
+    else
+        wallhackThread:terminate()
+    end
 end

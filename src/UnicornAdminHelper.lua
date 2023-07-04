@@ -13,7 +13,7 @@ script_description('Скрипт в помощь администратору и
 script_version('2.0.0')
 script_version_number(5)
 script_moonloader(26)
-script_dependencies('encoding', 'samp')
+script_dependencies('samp')
 
 --[[ Константы ]]
 -- На самом деле, в Lua не существует констант,

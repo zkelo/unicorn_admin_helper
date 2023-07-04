@@ -3,6 +3,8 @@ local inicfg = require 'inicfg'
 local samp = require 'samp.events'
 local vkeys = require 'vkeys'
 local winmsg = require 'windows.message'
+local io = require 'io'
+local ffi = require 'ffi'
 
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
@@ -13,9 +15,18 @@ script_version_number(5)
 script_moonloader(26)
 script_dependencies('encoding', 'samp')
 
+--[[ Константы ]]
+-- На самом деле, в Lua не существует констант,
+-- поэтому здесь есть просто условность о том,
+-- что если название переменной написано в верхнем регистре,
+-- то переменная является константой и изменять её нельзя
+
 --[[ Переменные и значения по умолчанию ]]
+-- Путь к папке config
+local configDir = getWorkingDirectory() .. '/config'
+
 -- Название конфигурационного файла
-local configFilename = 'UnicornAdminHelper'
+local configFilepath = configDir .. '/UnicornAdminHelper.json'
 
 -- Отладка
 local debug = false
@@ -45,12 +56,12 @@ local dialog = {
     }
 }
 
--- Данные (состояние) скрипта
-local data = inicfg.load({
-    -- Настройки
-    settings = {
-        -- Автоматический pagesize
-        autoPageSize = 0,
+-- Настройки скрипта по умолчанию
+local defaults = {
+    -- Автоматический pagesize
+    autoPageSize = 0,
+    -- Горячие клавиши
+    hotkeys = {
         -- Клавиша включения\отключения Wallhack-а
         hotkeyWallhack = vkeys.VK_F3,
         -- Клавиша открытия списка нарушителей
@@ -91,18 +102,23 @@ local data = inicfg.load({
         '/bl {s:Никнейм игрока} - заблокировать аккаунт>block:$1',
         '/b {d:ID игрока} {t:Причина} - забанить игрока>ban:$1,$2,$3',
         '/bx {s:Никнейм игрока} {t:Причина} - забанить игрока>banex:$1,$2',
-        '/bc {d:ID игрока} - забанить игрока за чит>ban:$1+Cheat',
+        '/bc {d:ID игрока} - забанить игрока за чит>ban:$1,Cheat',
         '/um {d:ID игрока} - снять бан чата>unmute:$1',
         '/umx {s:Никнейм игрока} - снять бан чата>unmuteex:$1',
         '/uw {d:ID игрока} - снять предупреждение>unwarn:$1',
         '/uj {d:ID игрока} - выпустить из тюрьмы>unjail:$1',
         '/ub {s:Никнейм игрока} - разбанить>unban:$1',
         '/ubl {s:Никнейм игрока} - разблокировать аккаунт>unblock:$1'
+    },
+    -- Wallhack
+    wallhack = {
+        enabled = false
     }
-}, configFilename)
-if data.suspects == nil then
-    data.suspects = {}
-end
+}
+
+-- Настройки скрипта
+-- Они загружаются в функции `main()` до цикла
+local settings
 
 -- Параметры команд
 local cmdParams = {
@@ -125,44 +141,90 @@ local keyCapture = {
 -- если пользователь часто открывает список
 local suspectsListShownCounter = 0
 
+-- Индекс выбранного пункта в диалоге со списком нарушителей
 local suspectsListItemIndex = nil
+
+-- Флаг необходимости возврата в диалог настроек при закрытии открытого диалога
 local backwardToSettingsFromCurrentDialog = false
+
+-- Список нарушителей
 local serverSuspects = {}
 
+-- Поток для Wallhack-а
+local wallhackThread
+
+-- ID частей тела персонажа,
+-- на которых будут отрисовываться
+-- линии при включённом Wallhack-е
+local wallhackBodyParts = {
+    3, 4, 5, 51, 52,
+    41, 42, 31, 32, 33,
+    21, 22, 23, 2
+}
+
+-- Состояние, находится ли игрок в слежке (для WH)
+local isPlayerSpectating = false
+
 --[[ Вспомогательные функции ]]
--- Сохранение данных (состояния) скрипта
-function saveData()
-    local d, cl = deepcopy(data), {}
-    for k, c in pairs(d.commands) do
-        cl[k] = c.raw
+-- Загрузка настроек скрипта
+function loadSettings()
+    local config = io.open(configFilepath, 'r')
+    if config == nil then
+        settings = defaults
+        settings.commands = parseCommands(settings.commands)
+        return
     end
 
-    if not inicfg.save(d, configFilename) then
-        print('Не удалось сохранить данные в файл')
+    settings = decodeJson(config:read('*a'))
+    config:close()
+
+    --[[ Проверка корректности значений настроек ]]
+    -- Список нарушителей должен быть таблицей
+    if settings.suspects == nil then
+        settings.suspects = {}
+    end
+
+    -- autoPageSize может иметь только следующие значения:
+    -- 0 или от 10 до 20 включительно
+    if settings.autoPageSize ~= 0 and (settings.autoPageSize < 10 or settings.autoPageSize > 20) then
+        settings.autoPageSize = 0
+    end
+
+    -- Обработка команд
+    if not pcall(function () settings.commands = parseCommands(settings.commands) end) then
+        settings.commands = parseCommands(defaults.commands)
+        sampAddChatMessage(string.format('Ошибка: %sНе удалось разобрать список команд. Восстановлены стандартные команды', c(color.white)), color.red)
     end
 end
 
--- Подготовка никнейма игрока, добавляемого в список нарушителей
-function prepareSuspectName(name, toSave)
-    if toSave then
-        return name:gsub('%.', '~')
+-- Сохранение настроек скрипта
+function saveSettings()
+    local cl = {}
+    for k, c in pairs(settings.commands) do
+        cl[k] = c.raw
     end
+    settings.commands = cl
 
-    return name:gsub('~', '%.')
+    local config = io.open(configFilepath, 'w')
+    config:write(encodeJson(settings))
+    config:close()
+
+    if not pcall(function () settings.commands = parseCommands(settings.commands) end) then
+        settings.commands = parseCommands(defaults.commands)
+        sampAddChatMessage(string.format('Ошибка: %sНе удалось разобрать список команд. Восстановлены стандартные команды', c(color.white)), color.red)
+    end
 end
 
 -- Добавление игрока в список нарушителей
 function addSuspect(name, comment)
-    name = prepareSuspectName(name, true)
-    data.suspects[name] = comment
-    saveData()
+    settings.suspects[name] = comment
+    saveSettings()
 end
 
 -- Удаление игрока из списка нарушителей
 function delSuspect(name)
-    name = prepareSuspectName(name, true)
-    data.suspects[name] = nil
-    saveData()
+    settings.suspects[name] = nil
+    saveSettings()
 end
 
 -- Вспомогательная функция для вставки цвета в сообщение
@@ -192,34 +254,13 @@ function getPlayerIdByNickname(nickname)
     return nil
 end
 
--- Копирует таблицы (и не только) любых уровней
--- Взято отсюда: http://lua-users.org/wiki/CopyTable
-function deepcopy(orig)
-    local orig_type = type(orig)
-    local copy
-
-    if orig_type == 'table' then
-        copy = {}
-        for orig_key, orig_value in next, orig, nil do
-            copy[deepcopy(orig_key)] = deepcopy(orig_value)
-        end
-        setmetatable(copy, deepcopy(getmetatable(orig)))
-    else -- number, string, boolean, etc
-        copy = orig
-    end
-
-    return copy
-end
-
 -- Возвращает никнейм игрока из списка нарушителей
 -- по индексу его записи в списке
 -- Если игрок не в сети, возвращает `nil`
 function getSuspectNicknameByIndex(index)
     local i = 0
 
-    for nickname, _ in pairs(data.suspects) do
-        nickname = prepareSuspectName(nickname, false)
-
+    for nickname, _ in pairs(settings.suspects) do
         if i == index then
             return nickname
         end
@@ -246,7 +287,7 @@ end
 function parseCommands(commands)
     local list = {}
 
-    for _, c in ipairs(commands) do
+    for _, c in pairs(commands) do
         local l, r = c:match('([^%>]+)>(.+)')
 
         local m = ''
@@ -279,10 +320,10 @@ function parseCommands(commands)
     return list
 end
 
--- Обрабатывает собственные команды
+-- Обрабатывает пользовательские команды
 function handleCustomCommand(text, args)
     --[[ Проверка на существование команды ]]
-    local cmd = data.commands[text]
+    local cmd = settings.commands[text]
     if cmd == nil then
         sampAddChatMessage(string.format('Ошибка: %sНе удалось найти команду', c(color.white)), color.red)
         return
@@ -344,6 +385,36 @@ function handleCustomCommand(text, args)
     sampSendChat(result)
 end
 
+-- Возвращает координаты костей скелета персонажа
+local getBonePosition = ffi.cast('int (__thiscall*)(void*, float*, int, bool)', 0x5e4280)
+
+-- join_argb
+function join_argb(a, r, g, b)
+    local argb = b -- b
+    argb = bit.bor(argb, bit.lshift(g, 8)) -- g
+    argb = bit.bor(argb, bit.lshift(r, 16)) -- r
+    argb = bit.bor(argb, bit.lshift(a, 24)) -- a
+    return argb
+end
+
+-- explode_argb
+function explode_argb(argb)
+    local a = bit.band(bit.rshift(argb, 24), 0xFF)
+    local r = bit.band(bit.rshift(argb, 16), 0xFF)
+    local g = bit.band(bit.rshift(argb, 8), 0xFF)
+    local b = bit.band(argb, 0xFF)
+    return a, r, g, b
+end
+
+-- Возвращает координаты части тела персонажа
+function getBodyPartCoordinates(id, handle)
+    local ptr = getCharPointer(handle)
+    local vec = ffi.new('float[3]')
+
+    getBonePosition(ffi.cast('void*', ptr), vec, id, true)
+    return vec[0], vec[1], vec[2]
+end
+
 --[[ Главные функции ]]
 function main()
     -- Если SAMP или SAMPFUNCS не загружен,
@@ -358,8 +429,16 @@ function main()
     end
 
     --[[ Инициализация скрипта ]]
-    -- Загрузка команд из конфига
-    data.commands = parseCommands(data.commands)
+    -- Создание папки config, если она не существует
+    if not doesDirectoryExist(configDir) then
+        createDirectory(configDir)
+    end
+
+    -- Загрузка настроек из конфига
+    loadSettings()
+
+    -- Создание конфига при первом запуске скрипта
+    saveSettings()
 
     -- Приветственное сообщение
     sampAddChatMessage(thisScript().name .. ' ' .. thisScript().version .. ' успешно загружен', color.system)
@@ -372,8 +451,7 @@ function main()
     -- Регистрация основных команд чата
     sampRegisterChatCommand('uah', function ()
         local commands = ''
-
-        for text, cmd in pairs(data.commands) do
+        for text, cmd in pairs(settings.commands) do
             local ps = ''
 
             if not isEmpty(cmd.args) then
@@ -396,13 +474,13 @@ function main()
         local content = string.format(
             -- 0                      1                        2
             '%s--- Wallhack в слежке\nКлавиша активации: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeyWallhack)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeyWallhack)
         ) .. string.format(
             -- 3                       4                              5                             6                       7
             '%s--- Список нарушителей\nКлавиша открытия списка: %s%s\nКлавиша редактирования: %s%s\nКлавиша удаления: %s%s\n \n',
-            c(color.yellow), c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsList),
-            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsEdit),
-            c(color.grey), vkeys.id_to_name(data.settings.hotkeySuspectsDelete)
+            c(color.yellow), c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsList),
+            c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsEdit),
+            c(color.grey), vkeys.id_to_name(settings.hotkeys.hotkeySuspectsDelete)
         ) .. string.format(
             -- 8
             '%s--- Команды %s(%d)\n%s',
@@ -417,9 +495,7 @@ function main()
         local text = 'Статус\tНикнейм\tКомментарий'
 
         local list = ''
-        for nickname, comment in pairs(data.suspects) do
-            nickname = prepareSuspectName(nickname, false)
-
+        for nickname, comment in pairs(settings.suspects) do
             if comment == '(не указан)' then
                 comment = c(color.lightGrey) .. comment
             end
@@ -466,7 +542,7 @@ function main()
             return
         end
 
-        if not isEmpty(data.suspects[lowerNickname]) then
+        if not isEmpty(settings.suspects[lowerNickname]) then
             delSuspect(nickname)
         end
 
@@ -485,17 +561,22 @@ function main()
         end
     end)
 
-    -- Регистрация собственных команд
-    for text, _ in pairs(data.commands) do
+    -- Регистрация пользовательских команд
+    for text, _ in pairs(settings.commands) do
         sampRegisterChatCommand(text, function (args)
-            handleCustomCommand(text, args)
+            if not pcall(handleCustomCommand, text, args) then
+                sampAddChatMessage(string.format(
+                    'Ошибка: %sВо время выполнения команды %q произошла ошибка',
+                    c(color.white), text
+                ), color.red)
+            end
         end)
     end
 
     -- Регистрация консольных команд
     sampfuncsRegisterConsoleCommand('uah', function (arg)
         if isEmpty(arg) then
-            print('uah [[num_]version | suspects | debug]')
+            print('uah [[num_]version | suspects | debug | settings | wallhack]')
         elseif arg == 'debug' then
             debug = not debug
 
@@ -507,16 +588,37 @@ function main()
             end
 
             print('Отладка ' .. state)
+        elseif arg == 'settings' then
+            for name, value in pairs(settings) do
+                if type(value) == 'table' then
+                    for subname, subvalue in pairs(value) do
+                        print(name, ':', subname, '=', subvalue)
+                    end
+                else
+                    print(name, '=', value)
+                end
+            end
         elseif arg == 'version' then
             print(thisScript().name .. ' ' .. thisScript().version)
         elseif arg == 'num_version' then
             print(tostring(thisScript().version_num))
         elseif arg == 'suspects' then
-            for name, comment in pairs(data.suspects) do
+            for name, comment in pairs(settings.suspects) do
                 print(string.format('%q: %q', name, comment))
             end
+        elseif arg == 'wallhack' then
+            print('Статус WH: ', settings.wallhack.enabled and 'Включён' or 'Выключен')
+            print('Статус потока WH: ', wallhackThread:status())
         end
     end)
+
+    -- Поток для Wallhack-а
+    wallhackThread = lua_thread.create_suspended(threadWallhack)
+    if settings.wallhack.enabled and isPlayerSpectating then
+        -- Если Wallhack включён в настройках,
+        -- то необходимо запустить поток
+        wallhackThread:run()
+    end
 
     -- Главный цикл
     while true do
@@ -525,9 +627,18 @@ function main()
         --[[ Обработка нажатий клавиш ]]
         if not sampIsChatInputActive()
             and not sampIsDialogActive()
-            and isKeyJustPressed(data.settings.hotkeySuspectsList)
         then
-            sampProcessChatInput('/suspects')
+            if isKeyJustPressed(settings.hotkeys.hotkeySuspectsList) then
+                sampProcessChatInput('/suspects')
+            elseif isKeyJustPressed(settings.hotkeys.hotkeyWallhack) then
+                settings.wallhack.enabled = not settings.wallhack.enabled
+
+                if settings.wallhack.enabled and isPlayerSpectating then
+                    wallhackThread:run()
+                else
+                    wallhackThread:terminate()
+                end
+            end
         end
 
         --[[ Обработка диалогов ]]
@@ -555,19 +666,19 @@ function main()
             then
                 if listitem == 1 then
                     keyCapture.fnc = 'Активация Wallhack в слежке'
-                    keyCapture.id = data.settings.hotkeyWallhack
+                    keyCapture.id = settings.hotkeys.hotkeyWallhack
                     keyCapture.setting = 'hotkeyWallhack'
                 elseif listitem == 4 then
                     keyCapture.fnc = 'Открытие списка нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsList
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsList
                     keyCapture.setting = 'hotkeySuspectsList'
                 elseif listitem == 5 then
                     keyCapture.fnc = 'Редактирование записи в списке нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsEdit
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsEdit
                     keyCapture.setting = 'hotkeySuspectsEdit'
                 elseif listitem == 6 then
                     keyCapture.fnc = 'Удаление из списка нарушителей'
-                    keyCapture.id = data.settings.hotkeySuspectsDelete
+                    keyCapture.id = settings.hotkeys.hotkeySuspectsDelete
                     keyCapture.setting = 'hotkeySuspectsDelete'
                 end
 
@@ -586,8 +697,8 @@ function main()
         result, button, listitem = sampHasDialogRespond(dialog.settings.hotkey)
         if result then
             if button == 1 then
-                data.settings[keyCapture.setting] = keyCapture.id
-                saveData()
+                settings.hotkeys[keyCapture.setting] = keyCapture.id
+                saveSettings()
             end
 
             if backwardToSettingsFromCurrentDialog then
@@ -604,17 +715,60 @@ function main()
                 local nickname = getSuspectNicknameByIndex(listitem)
 
                 if nickname ~= nil then
-                    if isKeyJustPressed(data.settings.hotkeySuspectsDelete) then
+                    if isKeyJustPressed(settings.hotkeys.hotkeySuspectsDelete) then
                         -- Удаление из списка
                         delSuspect(nickname)
                         sampProcessChatInput('/suspects')
-                    elseif isKeyJustPressed(data.settings.hotkeySuspectsEdit) then
+                    elseif isKeyJustPressed(settings.hotkeys.hotkeySuspectsEdit) then
                         -- Изменение комментария
                         sampCloseCurrentDialogWithButton(0)
                         sampProcessChatInput('/su')
                         sampSetChatInputEnabled(true)
-                        sampSetChatInputText(string.format('/su %s %s', nickname, data.suspects[nickname]))
+                        sampSetChatInputText(string.format('/su %s %s', nickname, settings.suspects[nickname]))
                         suspectsListItemIndex = sampGetCurrentDialogListItem()
+                    end
+                end
+            end
+        end
+    end
+
+    wallhackThread:terminate()
+end
+
+--[[ Функция для отдельного потока для Wallhack ]]
+function threadWallhack()
+    while not sampIsLocalPlayerSpawned() do wait(1000) end
+
+    while true do
+        wait(0)
+
+        if not isPauseMenuActive() and not isKeyDown(vkeys.VK_F8) and not sampIsDialogActive() then
+            for id = 0, sampGetMaxPlayerId() do
+                if sampIsPlayerConnected(id) then
+                    local result, ped = sampGetCharHandleBySampPlayerId(id)
+                    local color = sampGetPlayerColor(id)
+                    local a, r, g, b = explode_argb(color)
+                    color = join_argb(255, r, g, b)
+
+                    if result and doesCharExist(ped) and isCharOnScreen(ped) then
+                        local pos1x, pos1y, pos1z
+
+                        for idx = 1, #wallhackBodyParts do
+                            pos1x, pos1y, pos1z = getBodyPartCoordinates(wallhackBodyParts[idx], ped)
+                            local pos2x, pos2y, pos2z = getBodyPartCoordinates(wallhackBodyParts[idx] + 1, ped)
+
+                            local screenPos1x, screenPos1y = convert3DCoordsToScreen(pos1x, pos1y, pos1z)
+                            local screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                            renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
+
+                            if idx == 4 or idx == 5 then
+                                pos2x, pos2y, pos2z = getBodyPartCoordinates(idx * 10 + 1, ped)
+                                screenPos2x, screenPos2y = convert3DCoordsToScreen(pos2x, pos2y, pos2z)
+
+                                renderDrawLine(screenPos1x, screenPos1y, screenPos2x, screenPos2y, 1, color)
+                            end
+                        end
                     end
                 end
             end
@@ -646,5 +800,16 @@ function samp.onServerMessage(messageColor, text)
 
         local suspectId = text:sub(openBracket + 1, closeBracket - 1)
         sampAddChatMessage(string.format('Обнаружен читер - ID: %d', suspectId), color.system)
+    end
+end
+
+--[[ Обработка входа и выхода из слежки ]]
+function samp.onTogglePlayerSpectating(state)
+    isPlayerSpectating = state
+
+    if settings.wallhack.enabled and isPlayerSpectating then
+        wallhackThread:run()
+    else
+        wallhackThread:terminate()
     end
 end

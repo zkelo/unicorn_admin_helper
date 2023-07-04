@@ -6,6 +6,8 @@ local winmsg = require 'windows.message'
 local io = require 'io'
 local ffi = require 'ffi'
 
+-- TODO Возможность добавления команд прямо в скрипте
+
 --[[ Метаданные ]]
 script_name('Unicorn Admin Helper')
 script_author('ZKelo')
